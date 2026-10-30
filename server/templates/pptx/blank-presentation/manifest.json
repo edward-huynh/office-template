@@ -1,0 +1,13 @@
+{
+  "id": "blank-presentation",
+  "type": "pptx",
+  "name": "Blank presentation",
+  "category": "Blank",
+  "description": "One empty title-and-content slide to start building.",
+  "hidden": true,
+  "file": "template.pptx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}

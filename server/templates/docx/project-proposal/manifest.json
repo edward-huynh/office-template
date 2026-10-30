@@ -1,0 +1,12 @@
+{
+  "id": "project-proposal",
+  "type": "docx",
+  "name": "Project Proposal",
+  "category": "Business",
+  "description": "Problem statement, objectives, scope, timeline and budget for a new project.",
+  "file": "template.docx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}

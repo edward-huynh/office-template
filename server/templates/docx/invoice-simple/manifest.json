@@ -1,0 +1,12 @@
+{
+  "id": "invoice-simple",
+  "type": "docx",
+  "name": "Simple Invoice",
+  "category": "Finance",
+  "description": "An invoice with bill-to details, itemized table and payment terms.",
+  "file": "template.docx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}
