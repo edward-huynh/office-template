@@ -6,7 +6,7 @@ import { Button, buttonClass } from './ui';
 export function LibrarySkeleton() {
   return (
     <div aria-busy="true" aria-label="Loading templates" className="space-y-8">
-      <div className="h-52 animate-pulse rounded-xl bg-indigo-100" />
+      <div className="h-52 animate-pulse rounded-xl bg-emerald-100" />
       <div className="grid grid-cols-[repeat(auto-fill,minmax(15.5rem,1fr))] gap-x-6 gap-y-9">
         {Array.from({ length: 8 }, (_, i) => (
           <div key={i} className="animate-pulse">

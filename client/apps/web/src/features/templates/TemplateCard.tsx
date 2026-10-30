@@ -10,7 +10,7 @@ import { UseTemplateButton } from './UseTemplateButton';
  */
 const FRAME = {
   docx: {
-    backdrop: 'from-sky-50 to-indigo-100',
+    backdrop: 'from-sky-50 to-blue-100',
     image: 'w-[74%] translate-y-4 rounded-t-sm ring-1 ring-black/10 group-hover:translate-y-2',
     layout: 'items-end',
     width: 480,

@@ -187,13 +187,13 @@ export function LibraryPage({
   const filtered = Boolean(search.q || search.category);
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-6 text-white sm:p-8">
+      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-700 p-6 text-white sm:p-8">
         <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-white/10 blur-2xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-40 size-64 rounded-full bg-fuchsia-400/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-40 size-64 rounded-full bg-lime-300/15 blur-3xl" />
         <div className="relative space-y-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{COPY[type].title}</h1>
-            <p className="text-indigo-100">{COPY[type].lead}</p>
+            <p className="text-emerald-100">{COPY[type].lead}</p>
           </div>
           <SearchBar type={type} search={search} />
         </div>

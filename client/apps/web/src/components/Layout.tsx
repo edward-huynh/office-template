@@ -18,7 +18,7 @@ const activeClass = 'bg-white text-primary ring-1 ring-black/5';
 function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2.5 px-2 text-[17px] font-bold tracking-tight text-slate-900">
-      <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm text-white ">
+      <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-sm text-white ">
         T
       </span>
       Template Library

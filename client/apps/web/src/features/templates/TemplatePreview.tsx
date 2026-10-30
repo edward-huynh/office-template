@@ -45,7 +45,7 @@ export function TemplatePreview({ template }: { template: Template }) {
           Not wrapped in <Hydrate when={never()}>: that boundary keeps only the server HTML of the
           first page load, so after a client-side navigation it rendered nothing.
         */}
-        <div className={`rounded-xl bg-gradient-to-br p-6 ${template.type === 'pptx' ? 'from-orange-50 to-rose-100' : 'from-sky-50 to-indigo-100'}`}>
+        <div className={`rounded-xl bg-gradient-to-br p-6 ${template.type === 'pptx' ? 'from-orange-50 to-rose-100' : 'from-sky-50 to-blue-100'}`}>
           <PreviewImages template={template} />
         </div>
         <aside className="h-fit space-y-4 rounded-xl border border-slate-200 bg-white p-6 lg:sticky lg:top-6">

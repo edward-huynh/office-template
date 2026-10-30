@@ -14,7 +14,7 @@ function DocumentCard({ document }: { document: OfficeDocument }) {
         params={{ documentId: document.id }}
         aria-hidden
         tabIndex={-1}
-        className={`flex aspect-[16/10] justify-center bg-gradient-to-br ${deck ? 'items-center from-orange-50 to-rose-100' : 'items-end from-sky-50 to-indigo-100'}`}
+        className={`flex aspect-[16/10] justify-center bg-gradient-to-br ${deck ? 'items-center from-orange-50 to-rose-100' : 'items-end from-sky-50 to-blue-100'}`}
       >
         <img
           src={document.thumbnailUrl}

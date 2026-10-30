@@ -2,10 +2,10 @@
 
 @theme {
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --color-brand-50: #eef2ff;
-  --color-brand-100: #e0e7ff;
-  --color-brand-600: #4f46e5;
-  --color-brand-700: #4338ca;
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
 }
 
 /* beUI components style themselves with shadcn-style semantic tokens. */
@@ -16,14 +16,14 @@
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #4f46e5;
+  --primary: #047857;
   --primary-foreground: #ffffff;
   --muted: #f1f5f9;
   --muted-foreground: #64748b;
-  --accent: #eef2ff;
+  --accent: #ecfdf5;
   --border: #e2e8f0;
   --border-strong: #cbd5e1;
-  --ring: #6366f1;
+  --ring: #10b981;
   --destructive: #dc2626;
   --success: #16a34a;
 }
@@ -72,9 +72,9 @@
   }
   .app-backdrop {
     background:
-      radial-gradient(900px 520px at 0% 0%, rgba(165, 180, 252, 0.55), transparent 60%),
-      radial-gradient(800px 520px at 100% 100%, rgba(232, 180, 255, 0.35), transparent 60%),
-      #eef0fb;
+      radial-gradient(900px 520px at 0% 0%, rgba(167, 243, 208, 0.5), transparent 60%),
+      radial-gradient(800px 520px at 100% 100%, rgba(253, 224, 171, 0.35), transparent 60%),
+      #eef5f0;
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-600;
