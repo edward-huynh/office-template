@@ -115,6 +115,18 @@ Services never branch on the type; they ask the registry. `detectDocType` identi
 
 `DocumentsService` is constructed with `templateStore.asReadOnly()`, a view with no write or remove methods, so there is no code path from a document operation to a template file. Only `TemplateImporter` holds the writable template store.
 
+### 4.3.1 Worker thread for document conversions
+
+DOCX and PPTX operations are CPU-bound (unzip, XML parsing, HTML conversion, sanitizing) and run on a single thread. Measured on the API: saving a DOCX blocked the event loop for 44 ms at 150 paragraphs and 137 ms at 600, growing linearly, so one large save would stall every other request.
+
+`infra/workers/DocumentPool` runs them in `worker_threads` (`DOC_WORKERS`, default 1; `0` runs inline, which is what the unit tests use by default). `doctypes/pooled.ts` returns a view of the handlers whose heavy methods (`validate`, `toEditorContent`, `fromEditorContent`, `readSlides`, `applySlideEdits`, `duplicateSlide`, `deleteSlide`) are proxied to the pool, and `DocumentsService` receives that view through its constructor. Properties of the pool:
+
+- Requests go to the least busy worker; `ApiError` status codes survive the thread boundary; Buffers are restored on both sides and results are transferred without copying.
+- A worker that crashes is replaced and only its in-flight requests fail (500).
+- After the change the worst `/api/health` latency during a save is 1–2 ms (was 44 and 137 ms). The save itself takes about 70–90 ms longer because the document is copied across threads, which is the price of keeping the API responsive.
+
+A worker for the browser was considered and **not** added: measured in real Chrome with a 4x CPU slowdown, a 9,000-word document and a 60-slide deck, typing, scrolling and slide switching produced no long task and 60 FPS, so there was no main-thread cost to move (see 7.6).
+
 ### 4.4 Preview generation
 
 - **Seed templates** ship with pre-rendered thumbnail and slide/page images created by `pnpm generate:templates` from the same specification that produces the template files (SVG rendered to PNG). They are committed, so a reviewer needs no extra tooling.
@@ -212,6 +224,14 @@ TanStack Start (React 19, SSR, no React Server Components) with TanStack Router,
 | `/documents/$documentId` | `ssr: 'data-only'` | The loader runs on the server (the document, plus the editor HTML for DOCX or the slide model for PPTX); the editor renders on the client as a full-window Office-style surface. Each editor is a separately loaded chunk. |
 | `/admin/templates` | `ssr: false` | Upload form (TanStack Form) |
 
+### 7.0 Layout (Dia style) and beUI components
+
+The window is a tinted backdrop with two things on it: the navigation rail (no panel, no divider) and the page as one rounded floating panel (`#main-panel`) that scrolls on its own; the window itself never scrolls. The rail holds an address-bar style **omnibox** (a beUI Combobox): type to find a template and jump to it, or choose a quick action ("New blank document / presentation") with an empty box. Results come from the API, debounced and aborted when the text changes, and the omnibox code is loaded when the browser is idle (or when the user reaches for it) behind a look-alike, so it is off the critical path. On small screens the rail becomes a compact top bar and the panel fills the screen.
+
+Controls come from [beUI](https://beui.dev) (MIT), vendored under `src/components/motion` (see its README for the local changes): **Button** everywhere (including ribbon buttons), **Input** (gallery search, admin form, document title), **Tabs** (gallery type switch, ribbon tabs), **Select** (font size) and **Combobox** (font family, omnibox). Router links styled as buttons reuse the same classes through `buttonClass`. Animations use `LazyMotion` with the lightweight `m` components; the feature bundle loads asynchronously.
+
+Behaviours worth knowing: ribbon controls keep the text selection (a `mousedown` is not allowed to move focus, and the editors restore the last selection), the ribbon wraps instead of scrolling because the Select list is not portaled, and **saving flushes every pending text edit of the slide editor first** (a beUI Select returns focus to its trigger, so a quick Ctrl+S could otherwise miss a format change that was still waiting on its debounce timer).
+
 ### 7.1.1 Gallery design
 
 The library follows a "modern gallery" style (hero search, type tabs, category chips, soft-shadow cards) inside an app shell with a left sidebar (a compact top bar with scrollable pills on small screens). The editors keep their Office look.
@@ -229,7 +249,7 @@ SSR improves first paint, SEO and link previews but does **not** by itself reduc
 2. **Deferred hydration** (`<Hydrate when={never()}>`, TanStack Start's experimental API) for the site footer, which is static markup rendered on the server and never hydrated. It is deliberately *not* used for content that can appear after a client-side navigation: such a boundary only keeps the server HTML of the first page load, and wrapping the preview images in it left them blank when the preview was opened from the library (found by testing, now covered by an end-to-end test).
 3. **Static components stay simple.** Cards and grids receive props from loaders; there are no per-card hooks or data libraries. Only the "Use template" button and the search box are interactive.
 4. **URL as state.** Search and filters are search params, so no client-side cache library is needed.
-5. **Measured.** `pnpm --filter @office-template/web analyze` fetches each page of a running build, collects the script, modulepreload and stylesheet files, and reports gzip sizes against a budget (default 150 KB of JavaScript per page). Current result: 141–145 KB gzip of JavaScript per page (budget 150 KB), almost all of it the framework baseline (React, router, Start runtime). The gallery adds only a few KB on top of that; the quick-preview modal and recent files are part of the gallery chunk.
+5. **Measured.** `pnpm --filter @office-template/web analyze` fetches each page of a running build, collects the script, modulepreload and stylesheet files, and reports gzip sizes against a budget (default 150 KB of JavaScript per page). Current result: about 168 KB gzip on the template and My files pages and 199 KB on the gallery pages (budget 210 KB). The framework baseline (React, router, Start runtime) is about 115 KB; beUI's animation runtime (`motion`) adds about 30 KB on content pages and about 55 KB on the gallery (segmented tabs, input), even with `LazyMotion` moving the feature bundle (about 19 KB) out of the initial load. The budget was 150 KB before beUI was adopted: that is the cost of the animation library, accepted on purpose and measured here.
 
 ### 7.3 Office-style editors
 
@@ -241,6 +261,19 @@ Both editors share one chrome (`features/documents/office/`): a coloured title b
 ### 7.4 API access
 
 `lib/api.ts` exposes one isomorphic client built on `hc<AppType>`. In the browser it calls `/api` on the page origin. During SSR it calls `API_INTERNAL_URL` directly and forwards the request's cookie header. Network failures become a readable `ApiClientError` instead of a bare `fetch failed`.
+
+### 7.6 Measured performance
+
+`pnpm --filter @office-template/web perf` drives real Chrome against a running build and records every animation frame and every long task (>50 ms) while it performs the heaviest interactions on large content: scrolling the gallery, opening the quick preview, switching tabs, typing 300 characters in a ~9,000-word document and scrolling it, typing in and switching between the slides of a 60-slide deck. Results on the development machine with a **4x CPU slowdown**, before and after the beUI and layout change:
+
+| Scenario | Before p95 / max frame | After p95 / max frame | Long tasks |
+| --- | --- | --- | --- |
+| Gallery: scroll | 16.8 / 16.8 ms | 16.7 / 16.8 ms in steady state (first scroll 33–50 ms while the compositor warms up) | 0 |
+| Quick preview x5, tabs x6 | 16.8 / 66.6 ms and 16.7 / 33.3 ms | 16.8 / 33.4 ms and 16.7 / 33.4 ms | 0 |
+| Word (9k words): type 300 chars, scroll | 16.7 / 16.8 ms | 16.7 / 16.8 ms | 0 |
+| Deck (60 slides): type, switch slides | 16.7 / 16.8 ms | 16.7 / 16.8 ms | 0 |
+
+Frames are capped at 60 FPS (16.7 ms), so equal numbers mean no regression. A single 250 ms frame was seen once while the lazily loaded chunks were being evaluated at 4x slowdown; it did not reproduce in repeated runs. Numbers from a headless run are only meaningful relative to each other.
 
 ### 7.5 Error and loading states
 
