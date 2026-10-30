@@ -35,7 +35,7 @@ export class Session {
   }
 }
 
-export async function createTestContext(overrides: Record<string, string> = {}) {
+export async function createTestContext(overrides: Record<string, string> = {}, handlers?: Parameters<typeof createApp>[0]['handlers']) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'office-template-test-'));
   const env = parseEnv({
     NODE_ENV: 'test',
@@ -51,7 +51,7 @@ export async function createTestContext(overrides: Record<string, string> = {}) 
   const templateStore = new LocalFileStore(path.join(root, 'templates'));
   const documentStore = new LocalFileStore(path.join(root, 'documents'));
   const logger = createLogger('silent', 'test');
-  const app = createApp({ env, logger, db, templateStore, documentStore, previews: new PlaceholderPreviewGenerator() });
+  const app = createApp({ env, logger, db, templateStore, documentStore, previews: new PlaceholderPreviewGenerator(), handlers });
 
   const importer = new TemplateImporter(new TemplatesRepository(db), templateStore);
   for (const entry of await loadCatalog(CATALOG_DIR)) {

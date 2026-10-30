@@ -1,6 +1,8 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { secureHeaders } from 'hono/secure-headers';
+import type { DocType } from './contracts/index.js';
+import type { DocTypeHandler } from './doctypes/types.js';
 import type { Db } from './infra/db/client.js';
 import type { FileStore } from './infra/storage/file-store.js';
 import type { PreviewGenerator } from './infra/preview/preview-generator.js';
@@ -30,6 +32,8 @@ export interface AppDeps {
   templateStore: FileStore;
   documentStore: FileStore;
   previews: PreviewGenerator;
+  /** Heavy document operations run here when given (see `pooledHandlers`); otherwise on the calling thread. */
+  handlers?: (type: DocType) => DocTypeHandler;
 }
 
 /** Wires repositories, services and routes. Tests call this with temporary stores and an in-memory DB. */
@@ -43,6 +47,7 @@ export function createApp(deps: AppDeps) {
     templates,
     deps.templateStore.asReadOnly(),
     deps.documentStore,
+    deps.handlers,
   );
   const importer = new TemplateImporter(templatesRepository, deps.templateStore);
   const services: Services = { env, logger, templates, documents, importer, previews: deps.previews };

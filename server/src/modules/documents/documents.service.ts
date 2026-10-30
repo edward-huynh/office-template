@@ -1,12 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import type { ReadStream } from 'node:fs';
-import type { Deck, EditorContent, OfficeDocument, SlideEdits, UpdateDocumentInput } from '../../contracts/index.js';
+import type { Deck, DocType, EditorContent, OfficeDocument, SlideEdits, UpdateDocumentInput } from '../../contracts/index.js';
 import { getHandler } from '../../doctypes/registry.js';
 import type { DocTypeHandler } from '../../doctypes/types.js';
 import type { DocumentRow } from '../../infra/db/schema.js';
 import { copyBetween, type FileStore, type ReadableStore } from '../../infra/storage/file-store.js';
 import { ApiError } from '../../shared/errors/api-error.js';
-import { sanitizeEditorHtml } from '../../shared/utils/sanitize-html.js';
 import { templatePreviewUrls, templateThumbnailUrl, type TemplatesService } from '../templates/templates.service.js';
 import type { DocumentsRepository } from './documents.repository.js';
 
@@ -27,12 +26,14 @@ export class DocumentsService {
     private readonly templates: TemplatesService,
     private readonly templateStore: ReadableStore,
     private readonly documentStore: FileStore,
+    /** Where document type handlers come from: direct calls, or the worker pool (see `pooledHandlers`). */
+    private readonly handlers: (type: DocType) => DocTypeHandler = getHandler,
   ) {}
 
   /** Copy-on-use: creates a new document from a copy of the template file. */
   async useTemplate(templateId: string, ownerSessionId: string): Promise<{ id: string }> {
     const template = this.templates.getRow(templateId);
-    const handler = getHandler(template.type);
+    const handler = this.handlers(template.type);
 
     const id = randomUUID();
     const key = `${id}.${handler.extension}`;
@@ -64,7 +65,7 @@ export class DocumentsService {
 
   async getContent(id: string, ownerSessionId: string): Promise<EditorContent> {
     const row = this.getOwned(id, ownerSessionId);
-    const handler = getHandler(row.type);
+    const handler = this.handlers(row.type);
     if (!handler.toEditorContent) {
       throw ApiError.badRequest(`${row.type.toUpperCase()} documents have no in-app editor`);
     }
@@ -76,15 +77,15 @@ export class DocumentsService {
   /** Overwrites the document copy. The template the copy came from is never touched. */
   async updateContent(id: string, ownerSessionId: string, input: UpdateDocumentInput): Promise<OfficeDocument> {
     const row = this.getOwned(id, ownerSessionId);
-    const handler = getHandler(row.type);
+    const handler = this.handlers(row.type);
     if (!handler.fromEditorContent || !handler.toEditorContent) {
       throw ApiError.badRequest(`${row.type.toUpperCase()} documents have no in-app editor`);
     }
     const defaults =
       (await this.readEditorState(row))?.defaults ??
       (await handler.toEditorContent(await this.documentStore.read(row.filePath))).defaults;
-    const html = sanitizeEditorHtml(input.html);
-    const file = await handler.fromEditorContent({ html });
+    // Conversion, sanitizing and validation all run in the handler (in the worker thread when pooled).
+    const { file, html } = await handler.fromEditorContent({ html: input.html });
     await handler.validate(file);
     await this.documentStore.write(row.filePath, file);
     await this.documentStore.write(editorStateKey(row), Buffer.from(JSON.stringify({ html, defaults })));
@@ -125,7 +126,7 @@ export class DocumentsService {
 
   private slideContext(id: string, ownerSessionId: string) {
     const row = this.getOwned(id, ownerSessionId);
-    const handler = getHandler(row.type);
+    const handler = this.handlers(row.type);
     if (!handler.readSlides) throw ApiError.badRequest(`${row.type.toUpperCase()} documents have no slides`);
     return { row, handler };
   }
@@ -147,7 +148,7 @@ export class DocumentsService {
 
   async download(id: string, ownerSessionId: string): Promise<DocumentDownload> {
     const row = this.getOwned(id, ownerSessionId);
-    const handler = getHandler(row.type);
+    const handler = this.handlers(row.type);
     const { size } = await this.documentStore.stat(row.filePath);
     return {
       stream: this.documentStore.openStream(row.filePath),
@@ -162,7 +163,8 @@ export class DocumentsService {
     if (!(await this.documentStore.exists(key))) return undefined;
     try {
       const saved = JSON.parse((await this.documentStore.read(key)).toString()) as EditorContent;
-      return { html: sanitizeEditorHtml(saved.html), defaults: saved.defaults };
+      // Written only by `updateContent` after sanitizing, so it is not sanitized again on every open.
+      return { html: saved.html, defaults: saved.defaults };
     } catch {
       return undefined; // unreadable sidecar: fall back to converting the DOCX
     }
