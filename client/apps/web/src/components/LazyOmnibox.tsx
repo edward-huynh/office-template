@@ -14,7 +14,7 @@ function Shell({ onActivate }: { onActivate?: () => void }) {
         placeholder="Search or jump to…"
         onFocus={onActivate}
         onPointerEnter={onActivate}
-        className="h-10 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+        className="h-10 min-w-0 flex-1 bg-transparent outline-none placeholder:text-slate-600"
       />
     </div>
   );

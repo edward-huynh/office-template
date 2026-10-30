@@ -42,7 +42,7 @@ export function RenameTitle({ id, title }: { id: string; title: string }) {
             setError(undefined);
             setEditing(true);
           }}
-          className="grid size-7 shrink-0 place-items-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          className="grid size-7 shrink-0 place-items-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
         >
           <Pencil aria-hidden className="size-3.5" />
         </button>

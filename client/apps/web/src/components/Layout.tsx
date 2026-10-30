@@ -40,7 +40,7 @@ function RecentList({ items }: { items: OfficeDocument[] }) {
   if (items.length === 0) return null;
   return (
     <section aria-labelledby="recent-nav-title" className="flex min-h-0 flex-1 flex-col">
-      <p id="recent-nav-title" className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+      <p id="recent-nav-title" className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-600">
         Recent
       </p>
       <ul className="-mx-1 min-h-0 flex-1 space-y-0.5 overflow-y-auto px-1">
@@ -77,7 +77,7 @@ export function Sidebar({ recents }: { recents: OfficeDocument[] }) {
           <NavItem to="/" exact icon="grid" label="All templates" />
           <NavItem to="/docx" icon="doc" label="Documents" />
           <NavItem to="/pptx" icon="slides" label="Presentations" />
-          <p className="mt-5 mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Yours</p>
+          <p className="mt-5 mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-600">Yours</p>
           <NavItem to="/documents" icon="folder" label="My files" />
         </nav>
         <RecentList items={recents} />

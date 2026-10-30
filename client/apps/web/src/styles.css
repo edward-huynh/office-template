@@ -58,6 +58,9 @@
   dialog {
     @apply m-auto;
   }
+  p {
+    text-wrap: pretty; /* no one-word last lines */
+  }
   /* Tailwind's reset gives buttons the default arrow; clickable things get the hand. */
   button:not(:disabled),
   summary,

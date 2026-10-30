@@ -87,7 +87,7 @@ export default function Omnibox({ autoFocus = false }: { autoFocus?: boolean }) 
         filter={() => true}
       >
         <ComboboxTrigger className="h-10 rounded-xl border-transparent bg-white/70 ">
-          <ComboboxInput aria-label="Search templates" placeholder="Search or jump to…" autoFocus={autoFocus} />
+          <ComboboxInput aria-label="Search templates" placeholder="Search or jump to…" autoFocus={autoFocus} className="placeholder:text-slate-600" />
         </ComboboxTrigger>
         <ComboboxContent className="w-72 rounded-xl">
           <ComboboxList ariaLabel="Templates and actions" className="p-2">
