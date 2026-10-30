@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
-import { Footer, Sidebar } from '#/components/Layout';
+import { AppShell } from '#/components/Layout';
 import appCss from '../styles.css?url';
 
 export const Route = createRootRoute({
@@ -31,12 +31,8 @@ function RootDocument({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen lg:flex">
-        <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-8 sm:py-8">{children}</main>
-          <Footer />
-        </div>
+      <body>
+        <AppShell>{children}</AppShell>
         <Scripts />
       </body>
     </html>

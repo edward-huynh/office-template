@@ -6,6 +6,8 @@ export function getRouter() {
   return createTanStackRouter({
     routeTree,
     scrollRestoration: true,
+    // The page scrolls inside the floating panel, not the window.
+    scrollToTopSelectors: ['#main-panel'],
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 30_000,
     // Show the skeleton only when a navigation is actually slow, to avoid flashes.

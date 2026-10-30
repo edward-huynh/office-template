@@ -7,7 +7,7 @@ import { formatBytes, formatDate, typeLabel } from '#/lib/format';
 function DocumentCard({ document }: { document: OfficeDocument }) {
   const deck = document.type === 'pptx';
   return (
-    <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg">
+    <article className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition ">
       <Link
         to="/documents/$documentId"
         params={{ documentId: document.id }}
@@ -21,7 +21,7 @@ function DocumentCard({ document }: { document: OfficeDocument }) {
           width={deck ? 480 : 480}
           height={deck ? 270 : 621}
           loading="lazy"
-          className={`h-auto bg-white shadow-[0_6px_18px_rgba(15,23,42,0.22)] ${deck ? 'w-[84%] rounded-md' : 'w-[62%] translate-y-3 rounded-t-sm'}`}
+          className={`h-auto bg-white ${deck ? 'w-[84%] rounded-xl' : 'w-[62%] translate-y-3 rounded-t-sm'}`}
         />
       </Link>
       <div className="flex flex-1 flex-col gap-1 p-4">
@@ -47,7 +47,7 @@ function DocumentCard({ document }: { document: OfficeDocument }) {
 
 export function DocumentsPage({ data }: { data: DocumentList }) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">My files</h1>
         <p className="mt-2 text-slate-600">Documents and presentations you created in this browser session.</p>

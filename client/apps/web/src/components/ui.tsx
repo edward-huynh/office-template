@@ -1,35 +1,46 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { forwardRef, type ComponentProps, type ReactNode } from 'react';
+import { Button as BeButton, SIZE_CLASS, VARIANT_CLASS, type ButtonSize, type ButtonVariant as BeVariant } from '@/components/motion/button/base';
+import { cn } from '@/lib/utils';
 
+/**
+ * The app's buttons are beUI buttons (spring press, reduced-motion aware). The app keeps two extra
+ * looks for dark and image backgrounds, built from the same component.
+ */
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'light' | 'glass';
 
-const variants: Record<ButtonVariant, string> = {
-  primary: 'bg-brand-600 text-white shadow-sm hover:bg-brand-700 disabled:bg-brand-600/50',
-  secondary: 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 disabled:opacity-50',
-  ghost: 'text-slate-700 hover:bg-slate-200/70 disabled:opacity-50',
-  /** For use on dark or image backgrounds. */
-  light: 'bg-white text-slate-900 shadow-sm hover:bg-slate-100 disabled:opacity-60',
-  glass: 'bg-white/20 text-white ring-1 ring-white/40 backdrop-blur hover:bg-white/30 disabled:opacity-60',
+const BASE_VARIANT: Record<ButtonVariant, BeVariant> = {
+  primary: 'primary',
+  secondary: 'secondary',
+  ghost: 'ghost',
+  light: 'secondary',
+  glass: 'ghost',
 };
 
-const base =
-  'inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed';
+const EXTRA: Partial<Record<ButtonVariant, string>> = {
+  light: 'border-transparent bg-white text-slate-900 hover:bg-slate-100',
+  glass: 'bg-white/20 text-white ring-1 ring-white/40 backdrop-blur hover:bg-white/30 hover:text-white',
+};
 
-/** Class string for links that should look like buttons. */
-export const buttonClass = (variant: ButtonVariant = 'primary') => `${base} ${variants[variant]}`;
+/** Class string for links that should look like buttons (router links cannot be a motion button). */
+export const buttonClass = (variant: ButtonVariant = 'primary', size: ButtonSize = 'md') =>
+  cn(
+    'inline-flex items-center justify-center font-medium select-none transition-colors',
+    VARIANT_CLASS[BASE_VARIANT[variant]],
+    SIZE_CLASS[size],
+    EXTRA[variant],
+  );
 
-export function Button({
-  variant = 'primary',
-  className = '',
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant }) {
-  return <button type="button" className={`${buttonClass(variant)} ${className}`} {...props} />;
-}
+type BeButtonProps = ComponentProps<typeof BeButton>;
+
+export const Button = forwardRef<HTMLButtonElement, Omit<BeButtonProps, 'variant'> & { variant?: ButtonVariant }>(
+  function Button({ variant = 'primary', className, ...props }, ref) {
+    return <BeButton ref={ref} variant={BASE_VARIANT[variant]} className={cn(EXTRA[variant], className)} {...props} />;
+  },
+);
 
 export function Badge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-block rounded-full bg-brand-50 px-2.5 py-0.5 text-xs font-medium text-brand-700">
-      {children}
-    </span>
+    <span className="inline-block rounded-xl bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{children}</span>
   );
 }
 
@@ -38,7 +49,7 @@ export function TypeMark({ type }: { type: 'docx' | 'pptx' }) {
   return (
     <span
       title={type === 'docx' ? 'Word document' : 'PowerPoint presentation'}
-      className={`grid size-6 place-items-center rounded-md text-[11px] font-black text-white shadow-sm ${
+      className={`grid size-6 place-items-center rounded-md text-[11px] font-black text-white ${
         type === 'docx' ? 'bg-[#2b579a]' : 'bg-[#c43e1c]'
       }`}
     >

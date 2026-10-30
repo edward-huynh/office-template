@@ -21,11 +21,11 @@ function BlankTile({ tile }: { tile: (typeof TILES)[number] }) {
         onClick={create}
         disabled={pending}
         aria-busy={pending}
-        className="group flex w-full items-center gap-4 rounded-2xl border-2 border-dashed border-slate-300 bg-white p-4 text-left transition hover:border-brand-600 hover:bg-brand-50/40 disabled:cursor-wait disabled:opacity-70 sm:w-72"
+        className="group flex w-full items-center gap-4 rounded-xl border-2 border-dashed border-slate-300 bg-white p-4 text-left transition hover:border-brand-600 hover:bg-brand-50/40 disabled:cursor-wait disabled:opacity-70 sm:w-72"
       >
-        <span className={`relative grid size-14 shrink-0 place-items-center rounded-xl text-lg font-black text-white shadow-sm ${tile.color}`}>
+        <span className={`relative grid size-14 shrink-0 place-items-center rounded-xl text-lg font-black text-white ${tile.color}`}>
           {tile.glyph}
-          <span className="absolute -bottom-1.5 -right-1.5 grid size-6 place-items-center rounded-full bg-white text-slate-700 shadow ring-1 ring-slate-200 transition group-hover:bg-brand-600 group-hover:text-white">
+          <span className="absolute -bottom-1.5 -right-1.5 grid size-6 place-items-center rounded-full bg-white text-slate-700 ring-1 ring-slate-200 transition group-hover:bg-brand-600 group-hover:text-white">
             {pending ? <Spinner /> : <Icon name="plus" size={14} />}
           </span>
         </span>
@@ -35,7 +35,7 @@ function BlankTile({ tile }: { tile: (typeof TILES)[number] }) {
         </span>
       </button>
       {error ? (
-        <p role="alert" className="mt-2 rounded-lg bg-red-50 px-2 py-1 text-xs text-red-700">
+        <p role="alert" className="mt-2 rounded-xl bg-red-50 px-2 py-1 text-xs text-red-700">
           {error}
         </p>
       ) : null}

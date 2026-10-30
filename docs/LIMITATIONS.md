@@ -5,7 +5,7 @@
 **Product 1: Document template library (DOCX)**
 
 - Blank document and blank presentation starters ("Start from scratch" tiles).
-- Modern gallery with thumbnails, name, description and category; search; type tabs; category filter; pagination; quick-preview modal; recent files.
+- Modern gallery (Dia-style window) with thumbnails, name, description and category; search; type tabs; category filter; pagination; quick-preview modal; recent files.
 - Preview page with page images; "Use template" creates an independent copy.
 - **Word-style editor**: title bar, Home / Insert / View ribbon with a contextual Table Layout tab, paper page on a grey canvas with ruler and page-break bands, status bar (page, word count, zoom). Font family and size, bold/italic/underline/strikethrough, font and highlight colour, alignment, bullets, numbering, indent, a styles gallery (Normal, Heading 1–3, Quote), tables (insert, add/delete rows and columns, merge, header row), links, horizontal line, undo/redo, Ctrl/Cmd+S, unsaved-changes warning, download as DOCX.
 - The template's heading colours and body font are carried into the editor, and fonts, sizes, colours and alignment are written to the DOCX as real Word properties.
@@ -29,7 +29,9 @@
 - OpenAPI/Swagger generated from the validation schemas.
 - Anonymous per-session ownership of documents.
 - SSR for library, preview and "My files"; real HTTP 404s; Open Graph tags on preview pages.
-- Tests: 75 server tests (Vitest; 3 need LibreOffice and skip without it), 27 end-to-end tests (Playwright), typecheck for both packages.
+- Dia-style layout with an omnibox (beUI Combobox) and beUI Button, Input, Tabs, Select and Combobox throughout.
+- DOCX/PPTX conversions run in a worker thread so large saves never stall the API; `pnpm perf` measures frames and long tasks.
+- Tests: 82 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 29 end-to-end tests (Playwright), typecheck for both packages.
 
 ## Not completed
 
@@ -67,9 +69,13 @@
 12. **Docker images were written and the compose file validated, but the images were not built on the development machine** (the Docker daemon was not running). Run `docker compose up --build` and report any problem; the non-Docker path is the one covered by tests.
 13. **Single-instance design.** SQLite and local files suit one server process. Scaling out needs a shared database and an object-store `FileStore`.
 14. **Pre-release dependencies.** TanStack Start is on its 1.x line but young; Deferred Hydration (`<Hydrate>`) is documented as experimental, and Nitro is a beta (`3.0.260610-beta`). Versions are pinned. Hydrate is used for one static block (the footer); it can be removed by deleting that wrapper.
-15. **JavaScript size.** Every page downloads about 141–145 KB gzip of JavaScript, almost all of it the React, router and Start runtime baseline. The Word editor adds about 145 KB gzip and the PowerPoint editor about 7 KB gzip, only on the editor page.
-16. **Browser coverage.** End-to-end tests run in Google Chrome only. Layouts were checked at desktop and phone widths; the editors are designed for desktop-size windows.
-17. **Gateway behaviour.** In production the web app streams `/api/*` to the API. In development a Vite proxy does this, because the dev server does not route non-HTML requests (such as `<img>`) to the server route.
+15. **JavaScript size.** About 168 KB gzip of JavaScript on content pages and 199 KB on the gallery pages: the React, router and Start runtime (about 115 KB) plus beUI's `motion` runtime (about 30–55 KB). The Word editor adds about 145 KB gzip and the PowerPoint editor about 7 KB gzip, only on the editor page. This is above the 150 KB budget used before beUI was adopted; the budget is now 210 KB.
+16. **beUI is vendored, not installed.** Updates are manual (`npx shadcn add @beui/<name>`, then re-apply the local changes listed in `src/components/motion/README.md`). The library is young and changes weekly. Only free components are used (beUI Pro is a separate paid license).
+17. **Type tabs need JavaScript.** The gallery's All / Documents / Presentations switch is a beUI Tabs control (buttons); without JavaScript a `<noscript>` link list takes its place. The lists, search form, category chips and pagination remain real links.
+18. **Ribbon layout.** The ribbon wraps its groups instead of scrolling horizontally, because the beUI Select list is positioned inside its parent and would be clipped by a scroll container. The editors are designed for desktop-size windows.
+19. **Worker thread trade-off.** A heavy save takes about 70–90 ms longer (data is copied across threads) in exchange for the API staying responsive; each worker holds its own copy of the libraries in memory (`DOC_WORKERS=0` turns it off). No browser worker is used because measurements showed none was needed.
+20. **Browser coverage.** End-to-end tests run in Google Chrome only. Layouts were checked at desktop and phone widths; the editors are designed for desktop-size windows.
+21. **Gateway behaviour.** In production the web app streams `/api/*` to the API. In development a Vite proxy does this, because the dev server does not route non-HTML requests (such as `<img>`) to the server route.
 
 ## Extension paths
 

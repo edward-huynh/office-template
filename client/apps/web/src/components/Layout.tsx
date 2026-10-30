@@ -1,16 +1,19 @@
 import { Hydrate } from '@tanstack/react-start';
 import { never } from '@tanstack/react-start/hydration';
 import { Link } from '@tanstack/react-router';
+import { LazyMotion } from 'motion/react';
+import type { ReactNode } from 'react';
 import { Icon, type IconName } from './icons';
+import { LazyOmnibox } from './LazyOmnibox';
 
-const activeClass = 'bg-white text-brand-700 shadow-sm ring-1 ring-slate-200';
-const idleClass = 'text-slate-600 hover:bg-white/70 hover:text-slate-900';
 const itemClass = 'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors';
+const idleClass = 'text-slate-600 hover:bg-white/60 hover:text-slate-900';
+const activeClass = 'bg-white text-primary ring-1 ring-black/5';
 
 function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2.5 px-2 text-[17px] font-bold tracking-tight text-slate-900">
-      <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm text-white shadow-sm">
+      <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm text-white ">
         T
       </span>
       Template Library
@@ -27,12 +30,17 @@ function NavItem({ to, icon, label, exact }: { to: '/' | '/docx' | '/pptx' | '/d
   );
 }
 
-/** Left navigation on large screens; a compact top bar with scrollable pills on small ones. */
+/**
+ * Left rail in the style of Dia: it sits directly on the tinted window background (no panel, no
+ * divider) and holds an address-bar style search box above the navigation. On small screens it
+ * becomes a compact top bar with scrollable pills.
+ */
 export function Sidebar() {
   return (
     <>
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col gap-6 border-r border-slate-200 bg-slate-50 px-4 py-6 lg:flex">
+      <aside className="hidden w-60 shrink-0 flex-col gap-5 p-3 lg:flex">
         <Brand />
+        <LazyOmnibox />
         <nav aria-label="Main" className="flex flex-col gap-1">
           <NavItem to="/" exact icon="grid" label="All templates" />
           <NavItem to="/docx" icon="doc" label="Documents" />
@@ -45,7 +53,7 @@ export function Sidebar() {
         </div>
       </aside>
 
-      <header className="border-b border-slate-200 bg-slate-50 px-4 py-3 lg:hidden">
+      <header className="shrink-0 px-4 py-3 lg:hidden">
         <Brand />
         <nav aria-label="Main" className="mt-3 flex gap-1.5 overflow-x-auto pb-1">
           <NavItem to="/" exact icon="grid" label="All" />
@@ -60,8 +68,8 @@ export function Sidebar() {
 
 function FooterContent() {
   return (
-    <footer className="border-t border-slate-200">
-      <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500 sm:px-8">
+    <footer className="border-t border-slate-100">
+      <div className="px-4 py-5 text-sm text-slate-500 sm:px-6">
         Templates are copied when you use them, so the originals are never changed. Your files belong to this browser
         session.
       </div>
@@ -75,5 +83,29 @@ export function Footer() {
     <Hydrate when={never()}>
       <FooterContent />
     </Hydrate>
+  );
+}
+
+/**
+ * Dia-style window: a tinted backdrop, the rail on it, and the page as one rounded-xl floating panel
+ * that scrolls on its own. The panel (not the window) is the scroll container.
+ */
+const loadMotionFeatures = () => import('#/lib/motion-features').then((module) => module.default);
+
+export function AppShell({ children }: { children: ReactNode }) {
+  return (
+    <LazyMotion features={loadMotionFeatures} strict>
+    <div className="app-backdrop flex h-dvh flex-col overflow-hidden lg:flex-row lg:p-2 lg:pl-0">
+      <Sidebar />
+      <div
+        id="main-panel"
+        data-scroll-restoration-id="main"
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white lg:rounded-xl lg:border lg:border-slate-200/70 "
+      >
+        <main className="w-full flex-1 p-4 sm:p-6">{children}</main>
+        <Footer />
+      </div>
+    </div>
+    </LazyMotion>
   );
 }

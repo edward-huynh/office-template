@@ -56,10 +56,10 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
       onKeyDown={onKeyDown}
       // A click on the backdrop lands on the <dialog> element itself.
       onClick={(event) => event.target === event.currentTarget && dialog.current?.close()}
-      className="w-[min(1080px,calc(100vw-1.5rem))] overflow-hidden rounded-3xl p-0 shadow-2xl backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
+      className="w-[min(1080px,calc(100vw-1.5rem))] overflow-hidden rounded-xl p-0 shadow-2xl backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     >
       <div className="grid max-h-[calc(100vh-1.5rem)] md:grid-cols-[1fr_21rem]">
-        <div className="min-h-0 overflow-y-auto bg-gradient-to-br from-slate-100 to-slate-200 p-5 sm:p-8">
+        <div className="min-h-0 overflow-y-auto bg-gradient-to-br from-slate-100 to-slate-200 p-6">
           {isDeck ? (
             <div className="space-y-4">
               <img
@@ -67,7 +67,7 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
                 alt={`${template.name}, slide ${index + 1} of ${total}`}
                 width={960}
                 height={540}
-                className="block h-auto w-full rounded-xl bg-white shadow-lg"
+                className="block h-auto w-full rounded-xl bg-white ring-1 ring-black/10"
               />
               <ol aria-label="Slides" className="flex gap-2 overflow-x-auto pb-1">
                 {template.previewUrls.map((url, i) => (
@@ -77,7 +77,7 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
                       onClick={() => setIndex(i)}
                       aria-label={`Show slide ${i + 1}`}
                       aria-current={i === index}
-                      className={`block w-28 overflow-hidden rounded-lg border-2 ${i === index ? 'border-brand-600' : 'border-transparent opacity-80 hover:opacity-100'}`}
+                      className={`block w-28 overflow-hidden rounded-xl border-2 ${i === index ? 'border-brand-600' : 'border-transparent opacity-80 hover:opacity-100'}`}
                     >
                       <img src={url} alt="" width={960} height={540} loading="lazy" className="block h-auto w-full" />
                     </button>
@@ -94,7 +94,7 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
                     alt={`${template.name}, page ${i + 1}`}
                     width={720}
                     height={932}
-                    className="block h-auto w-full bg-white shadow-lg"
+                    className="block h-auto w-full bg-white ring-1 ring-black/10"
                   />
                 </li>
               ))}
@@ -112,7 +112,7 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
               type="button"
               aria-label="Close preview"
               onClick={() => dialog.current?.close()}
-              className="grid size-8 place-items-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+              className="grid size-8 place-items-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900"
             >
               <Icon name="close" size={18} />
             </button>

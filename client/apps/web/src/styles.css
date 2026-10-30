@@ -8,15 +8,61 @@
   --color-brand-700: #4338ca;
 }
 
+/* beUI components style themselves with shadcn-style semantic tokens. */
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #eef2ff;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --ring: #6366f1;
+  --destructive: #dc2626;
+  --success: #16a34a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+}
+
 @layer base {
   html {
     color-scheme: light;
   }
   body {
     @apply bg-white font-sans text-slate-900 antialiased;
+    overflow: hidden; /* the app shell scrolls inside its own panel */
   }
   dialog {
     @apply m-auto;
+  }
+  .app-backdrop {
+    background:
+      radial-gradient(900px 520px at 0% 0%, rgba(165, 180, 252, 0.55), transparent 60%),
+      radial-gradient(800px 520px at 100% 100%, rgba(232, 180, 255, 0.35), transparent 60%),
+      #eef0fb;
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-brand-600;

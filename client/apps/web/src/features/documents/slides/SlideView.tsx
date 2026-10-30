@@ -7,6 +7,9 @@ const FONT = 'Calibri, Carlito, "Segoe UI", Arial, sans-serif';
 
 const alignCss = { l: 'left', ctr: 'center', r: 'right', just: 'justify' } as const;
 
+/** Dispatched on `window` to make every text box report pending edits immediately. */
+export const FLUSH_EVENT = 'slide-text-flush';
+
 function boxStyle(shape: SlideShape): CSSProperties {
   return {
     position: 'absolute',
@@ -87,6 +90,17 @@ function EditableText({
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
+  // Saving asks every box to report a change that is still waiting on its debounce timer, whatever
+  // has focus (a toolbar control may hold it when the user presses Ctrl+S).
+  useEffect(() => {
+    const flush = () => {
+      if (timer.current) commit();
+    };
+    window.addEventListener(FLUSH_EVENT, flush);
+    return () => window.removeEventListener(FLUSH_EVENT, flush);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  });
+
   // "Click to add title" style hint, shown while the box is empty (never part of the saved text).
   const hint = /title/i.test(shape.name) ? 'Click to add title' : /sub/i.test(shape.name) ? 'Click to add subtitle' : 'Click to add text';
   const syncEmpty = () => {
@@ -96,6 +110,7 @@ function EditableText({
 
   const commit = () => {
     clearTimeout(timer.current);
+    timer.current = undefined;
     if (ref.current) onText(slideIndex, shape.id, domToParagraphs(ref.current));
   };
 

@@ -2,20 +2,22 @@ import { useForm } from '@tanstack/react-form';
 import { Link } from '@tanstack/react-router';
 import { useState } from 'react';
 import type { Template } from '@office-template/server/contracts';
+import { Input } from '@/components/motion/input';
 import { Button, Spinner } from '#/components/ui';
 import { ApiClientError, uploadTemplate } from '#/lib/api';
 
 const required = ({ value }: { value: string }) => (value.trim() ? undefined : 'This field is required');
 
+/** Native controls (textarea, file input) share the beUI input's label and error styling. */
 function FieldShell({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1">
-      <label className="block text-sm font-medium text-slate-700">
+    <div className="flex flex-col gap-1.5">
+      <label className="px-1 text-sm font-medium text-foreground">
         {label}
         {children}
       </label>
       {error ? (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="px-1 text-xs text-destructive">
           {error}
         </p>
       ) : null}
@@ -23,7 +25,7 @@ function FieldShell({ label, error, children }: { label: string; error?: string;
   );
 }
 
-const inputClass = 'mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm';
+const nativeClass = 'mt-1.5 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:border-foreground/40 focus:ring-2 focus:ring-ring/40';
 
 /** Adds a template through the admin API; the new template shows up in the library immediately. */
 export function UploadForm() {
@@ -61,33 +63,48 @@ export function UploadForm() {
         event.stopPropagation();
         void form.handleSubmit();
       }}
-      className="max-w-xl space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 "
     >
       <form.Field name="token" validators={{ onBlur: required, onSubmit: required }}>
         {(field) => (
-          <FieldShell label="Admin token" error={field.state.meta.errors[0]?.toString()}>
-            <input type="password" autoComplete="off" className={inputClass} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-          </FieldShell>
+          <Input
+            label="Admin token" type="password" autoComplete="off"
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            onChange={field.handleChange}
+            error={field.state.meta.errors[0]?.toString()}
+            reserveErrorLine
+          />
         )}
       </form.Field>
       <form.Field name="name" validators={{ onBlur: required, onSubmit: required }}>
         {(field) => (
-          <FieldShell label="Template name" error={field.state.meta.errors[0]?.toString()}>
-            <input className={inputClass} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-          </FieldShell>
+          <Input
+            label="Template name"
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            onChange={field.handleChange}
+            error={field.state.meta.errors[0]?.toString()}
+            reserveErrorLine
+          />
         )}
       </form.Field>
       <form.Field name="category" validators={{ onBlur: required, onSubmit: required }}>
         {(field) => (
-          <FieldShell label="Category" error={field.state.meta.errors[0]?.toString()}>
-            <input className={inputClass} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
-          </FieldShell>
+          <Input
+            label="Category"
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            onChange={field.handleChange}
+            error={field.state.meta.errors[0]?.toString()}
+            reserveErrorLine
+          />
         )}
       </form.Field>
       <form.Field name="description" validators={{ onBlur: required, onSubmit: required }}>
         {(field) => (
           <FieldShell label="Short description" error={field.state.meta.errors[0]?.toString()}>
-            <textarea rows={3} maxLength={500} className={inputClass} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
+            <textarea rows={3} maxLength={500} className={nativeClass} value={field.state.value} onBlur={field.handleBlur} onChange={(e) => field.handleChange(e.target.value)} />
           </FieldShell>
         )}
       </form.Field>
@@ -100,7 +117,7 @@ export function UploadForm() {
             <input
               type="file"
               accept=".docx,.pptx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-              className={inputClass}
+              className={nativeClass}
               onChange={(e) => field.handleChange(e.target.files?.[0] ?? null)}
             />
           </FieldShell>
@@ -117,12 +134,12 @@ export function UploadForm() {
       </form.Subscribe>
 
       {result.error ? (
-        <p role="alert" className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-800">
+        <p role="alert" className="rounded-xl bg-red-50 px-4 py-2 text-sm text-red-800">
           {result.error}
         </p>
       ) : null}
       {result.template && link ? (
-        <p role="status" className="rounded-lg bg-green-50 px-4 py-2 text-sm text-green-900">
+        <p role="status" className="rounded-xl bg-green-50 px-4 py-2 text-sm text-green-900">
           Saved “{result.template.name}” (version {result.template.version}).{' '}
           <Link {...link} className="font-medium underline">
             View it in the library

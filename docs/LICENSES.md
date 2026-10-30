@@ -31,6 +31,10 @@ Licenses below were read from each installed package's `package.json` on 2026-10
 | react, react-dom | 19.3.1 | MIT | UI |
 | @tiptap/react, starter-kit, extension-table, extension-text-style, extension-text-align, pm | 3.32.1 | MIT | Word-style editor |
 | hono (client only) | 4.13.14 | MIT | Typed API client |
+| motion | 14.8.0 | MIT | Animations for beUI components (`LazyMotion`) |
+| lucide-react | 1.64.0 | ISC | Icons used by beUI components |
+| clsx, tailwind-merge | 2.1.1, 3.7.0 | MIT | Class name helpers used by beUI components |
+| beUI components (vendored in `src/components/motion`) | n/a | MIT, Copyright (c) 2026 Saurabh Chauhan | Button, Input, Tabs, Select, Combobox. Source: https://beui.dev. Local changes are listed in that folder's README |
 
 ## Development and tooling
 

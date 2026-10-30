@@ -11,7 +11,10 @@
 import { gzipSync } from 'node:zlib';
 
 const base = (process.argv[2] ?? process.env.BASE_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-const BUDGET_KB = Number(process.env.JS_BUDGET_KB ?? 150);
+// The framework baseline (React, router, Start runtime) is about 115 KB gzip. beUI's animation runtime
+// (motion, loaded with LazyMotion) adds about 30 KB on content pages and about 55 KB on the gallery,
+// which also has the segmented tabs and the input.
+const BUDGET_KB = Number(process.env.JS_BUDGET_KB ?? 210);
 
 const pages = [
   { path: '/', budget: BUDGET_KB },

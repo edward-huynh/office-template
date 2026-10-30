@@ -11,7 +11,7 @@ function PreviewImages({ template }: { template: Template }) {
   return (
     <ol className={isDeck ? 'grid gap-4 sm:grid-cols-2' : 'mx-auto max-w-2xl space-y-6'}>
       {template.previewUrls.map((url, index) => (
-        <li key={url} className="overflow-hidden rounded-xl bg-white shadow-[0_4px_16px_rgba(15,23,42,0.14)] ring-1 ring-slate-200/70">
+        <li key={url} className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/70">
           <img
             src={url}
             alt={`${template.name}, ${isDeck ? 'slide' : 'page'} ${index + 1}`}
@@ -45,10 +45,10 @@ export function TemplatePreview({ template }: { template: Template }) {
           Not wrapped in <Hydrate when={never()}>: that boundary keeps only the server HTML of the
           first page load, so after a client-side navigation it rendered nothing.
         */}
-        <div className={`rounded-3xl bg-gradient-to-br p-5 sm:p-8 ${template.type === 'pptx' ? 'from-orange-50 to-rose-100' : 'from-sky-50 to-indigo-100'}`}>
+        <div className={`rounded-xl bg-gradient-to-br p-6 ${template.type === 'pptx' ? 'from-orange-50 to-rose-100' : 'from-sky-50 to-indigo-100'}`}>
           <PreviewImages template={template} />
         </div>
-        <aside className="h-fit space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-6">
+        <aside className="h-fit space-y-4 rounded-xl border border-slate-200 bg-white p-6 lg:sticky lg:top-6">
           <div className="flex items-center gap-2">
             <TypeMark type={template.type} />
             <Badge>{template.category}</Badge>

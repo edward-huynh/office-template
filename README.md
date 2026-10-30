@@ -3,6 +3,7 @@
 A working template gallery for Office documents. Pick a **Word (DOCX)** or **PowerPoint (PPTX)** template, preview it, and create your own copy. Both types open in an editor modelled on Word and PowerPoint (ribbon, page or slide canvas, status bar) and download as standard Office files. The original templates are never modified.
 
 - **Blank files**: "Start from scratch" tiles create a blank document (an empty Word-style page) or a blank presentation (one slide with empty title and content boxes).
+- **Layout**: a Dia-style window: a tinted backdrop with the navigation rail directly on it (including an address-bar style search box that jumps to a template or starts a blank file), and the page as one rounded floating panel.
 - **Gallery**: a modern template gallery: sidebar navigation, a hero with a large search, All / Documents / Presentations tabs, category chips, rounded thumbnail cards with hover actions, a quick-preview modal, and a "continue where you left off" row of your recent files.
 - **Documents**: 6 sample templates, searchable and filterable, edited in a Word-style editor (fonts, sizes, colours, alignment, lists, tables, ruler, page count, zoom).
 - **Presentations**: 4 sample decks with slide-by-slide preview, edited in a PowerPoint-style editor (thumbnails, in-place text editing and formatting, new/delete slide, slide show).
@@ -10,10 +11,10 @@ A working template gallery for Office documents. Pick a **Word (DOCX)** or **Pow
 
 | | |
 | --- | --- |
-| Frontend | TanStack Start (React 19, SSR), TanStack Router and Form, TipTap, Tailwind CSS |
+| Frontend | TanStack Start (React 19, SSR), TanStack Router and Form, TipTap, Tailwind CSS, [beUI](https://beui.dev) components (Button, Input, Tabs, Select, Combobox) |
 | Backend | Hono on Node, zod, OpenAPI/Swagger |
 | Data | SQLite (Drizzle ORM), local file storage |
-| Tests | Vitest (75), Playwright (27) |
+| Tests | Vitest (82), Playwright (29) |
 
 ## Quick start
 
@@ -27,6 +28,8 @@ pnpm start       # builds the web app, then runs the API on :3001 and the web ap
 Open <http://localhost:3000>. API docs: <http://localhost:3000/api/docs>.
 
 **No separate seed step.** When the API starts it checks the database against the template catalog in `server/templates/`: on the first run (empty database) it imports all sample templates; on later runs it finds everything already imported and just starts. The check is idempotent, so templates you add or change in `server/templates/` are picked up on the next start too. The log says which case it was (`Template catalog imported: …` or `Template catalog already imported (…)`). Set `AUTO_SEED=false` to turn this off.
+
+DOCX/PPTX conversions run in a worker thread (`DOC_WORKERS`, default 1; `0` runs them on the main thread), so saving a big document never stalls the API for other visitors.
 
 For development with hot reload, use `pnpm dev` instead of `pnpm start`.
 
@@ -63,6 +66,7 @@ Open <http://localhost:3000>. The API image includes LibreOffice (used to render
 | `pnpm typecheck` | Type-check both packages |
 | `pnpm build` | Production build of the web app |
 | `pnpm --filter @office-template/web analyze` | JS/CSS size per page of a running build |
+| `pnpm --filter @office-template/web perf` | Frame times and long tasks in Chrome for the heaviest interactions (a ~9k-word document, a 60-slide deck); add `--throttle=4` to emulate a slower CPU |
 
 `pnpm start` runs in development mode (admin token `dev-admin-token`). For a hardened production run, start the API with `NODE_ENV=production` and `ADMIN_TOKEN` set (`pnpm --filter @office-template/server start`) and the web app (`pnpm --filter @office-template/web start`) with `API_INTERNAL_URL` pointing at the API.
 

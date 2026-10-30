@@ -8,6 +8,7 @@ import {
   RibbonColor,
   RibbonGroup,
   RibbonRow,
+  RibbonCombobox,
   RibbonSelect,
   RibbonStack,
   StatusBar,
@@ -17,7 +18,7 @@ import {
   type SaveState,
 } from './office/chrome';
 import { Icon } from './office/icons';
-import { SlideView } from './slides/SlideView';
+import { FLUSH_EVENT, SlideView } from './slides/SlideView';
 
 const FONTS = ['Calibri', 'Arial', 'Times New Roman', 'Georgia', 'Verdana', 'Courier New', 'Cambria', 'Trebuchet MS', 'Segoe UI'];
 const SIZES = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40, 44, 48, 60, 72, 96];
@@ -67,6 +68,7 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
   const [tools, setTools] = useState<Tools>(DEFAULT_TOOLS);
   const [busy, setBusy] = useState(false);
 
+  const deckRef = useRef(deck);
   const dirty = useRef(new Set<string>());
   const titleDirty = useRef(false);
   const workspace = useRef<HTMLDivElement>(null);
@@ -91,12 +93,15 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
 
   const onText = useCallback(
     (slideIndex: number, shapeId: string, paragraphs: SlideParagraph[]) => {
-      setDeck((current) => ({
-        ...current,
-        slides: current.slides.map((s) =>
+      // Update the ref synchronously too, so a save that runs right after a flush sees this edit.
+      const next: Deck = {
+        ...deckRef.current,
+        slides: deckRef.current.slides.map((s) =>
           s.index === slideIndex ? { ...s, shapes: s.shapes.map((shape) => (shape.id === shapeId ? { ...shape, paragraphs } : shape)) } : s,
         ),
-      }));
+      };
+      deckRef.current = next;
+      setDeck(next);
       dirty.current.add(`${slideIndex}:${shapeId}`);
       markDirty();
     },
@@ -209,8 +214,9 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
   // ------------------------------------------------------------------- saving and structure
 
   const flushFocused = () => {
-    // Make sure the text box being edited has reported its latest text.
+    // Make sure every text box has reported its latest text, wherever focus is.
     (window.document.activeElement as HTMLElement | null)?.blur?.();
+    window.dispatchEvent(new Event(FLUSH_EVENT));
   };
 
   const save = useCallback(async (): Promise<boolean> => {
@@ -247,9 +253,6 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
     }
   }, [doc.id, doc.title, title]);
 
-  const deckRef = useRef(deck);
-  deckRef.current = deck;
-
   useEffect(() => {
     if (status !== 'dirty') return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();
@@ -274,6 +277,7 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
     try {
       if (!(await save())) return;
       const next = await run();
+      deckRef.current = next;
       setDeck(next);
       setActive(Math.max(0, Math.min(next.slides.length - 1, nextActive(next))));
       setRevision((r) => r + 1);
@@ -331,7 +335,7 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
         <RibbonGroup label="Font">
           <RibbonStack>
             <RibbonRow>
-              <RibbonSelect
+              <RibbonCombobox
                 label="Font family"
                 width="w-36"
                 value={tools.font}
@@ -418,10 +422,10 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
         onSave={() => void save()}
         actions={
           <>
-            <button type="button" onClick={() => setPresent(active)} className="flex items-center gap-1.5 rounded px-3 py-1.5 text-sm hover:bg-white/15">
+            <button type="button" onClick={() => setPresent(active)} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm hover:bg-white/15">
               <Icon name="play" /> Present
             </button>
-            <button type="button" onClick={() => void download()} disabled={status === 'saving'} className="flex items-center gap-1.5 rounded bg-white px-3 py-1.5 text-sm font-semibold text-[#b7472a] hover:bg-slate-100 disabled:opacity-60">
+            <button type="button" onClick={() => void download()} disabled={status === 'saving'} className="flex items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-sm font-semibold text-[#b7472a] hover:bg-slate-100 disabled:opacity-60">
               <Icon name="download" /> Download PPTX
             </button>
           </>
