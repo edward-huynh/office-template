@@ -18,7 +18,7 @@ const activeClass = 'bg-white text-primary ring-1 ring-black/5';
 
 function Brand() {
   return (
-    <Link to="/" className="flex items-center gap-2.5 px-2 text-[17px] font-bold tracking-tight text-slate-900">
+    <Link to="/" className="flex items-center gap-2.5 text-[17px] font-bold tracking-tight text-slate-900">
       <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-sm text-white ">
         T
       </span>
@@ -71,10 +71,12 @@ function RecentList({ items }: { items: OfficeDocument[] }) {
 export function Sidebar({ recents }: { recents: OfficeDocument[] }) {
   return (
     <>
-      <aside className="hidden w-60 shrink-0 flex-col gap-5 p-3 lg:flex">
+      <aside className="hidden w-64 shrink-0 flex-col gap-5 p-3 lg:flex">
         <Brand />
-        <SidebarSearch />
-        <QuickActions />
+        <div className="space-y-2">
+          <SidebarSearch />
+          <QuickActions />
+        </div>
         <nav aria-label="Main" className="flex flex-col gap-1">
           <NavItem to="/" exact icon="grid" label="All templates" />
           <NavItem to="/docx" icon="doc" label="Documents" />

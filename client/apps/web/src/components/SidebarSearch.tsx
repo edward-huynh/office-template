@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { sidebarControl } from './ui';
 
 const CommandSearch = lazy(() => import('./CommandSearch'));
 
@@ -49,11 +51,11 @@ export function SidebarSearch() {
         }}
         onPointerEnter={() => setLoaded(true)}
         onFocus={() => setLoaded(true)}
-        className="flex h-10 w-full items-center gap-2 rounded-xl border border-transparent bg-white/70 px-3 text-left text-sm text-slate-600 transition-colors hover:bg-white"
+        className={cn(sidebarControl, 'flex w-full cursor-pointer items-center gap-2 px-3 text-left font-normal')}
       >
         <Search aria-hidden className="size-4 shrink-0" />
         <span className="min-w-0 flex-1 truncate">Search or jump to…</span>
-        <kbd className="rounded border border-slate-300 px-1.5 py-0.5 text-[10px] font-medium text-slate-600">
+        <kbd className="font-sans text-xs text-slate-600">
           {mac ? '⌘K' : 'Ctrl K'}
         </kbd>
       </button>

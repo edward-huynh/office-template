@@ -38,6 +38,10 @@ export const Button = forwardRef<HTMLButtonElement, Omit<BeButtonProps, 'variant
   },
 );
 
+/** Look shared by the sidebar's search box and quick-action buttons, so they read as one block. */
+export const sidebarControl =
+  'h-10 rounded-xl border-0 bg-white/70 text-sm font-medium text-slate-700 ring-1 ring-black/5 transition-colors hover:bg-white hover:text-slate-900';
+
 export function Badge({ children }: { children: ReactNode }) {
   return (
     <span className="inline-block rounded-xl bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{children}</span>
