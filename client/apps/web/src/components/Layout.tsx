@@ -5,7 +5,8 @@ import { LazyMotion } from 'motion/react';
 import type { ReactNode } from 'react';
 import type { OfficeDocument } from '@office-template/server/contracts';
 import { Icon, type IconName } from './icons';
-import { LazyOmnibox } from './LazyOmnibox';
+import { QuickActions } from './QuickActions';
+import { SidebarSearch } from './SidebarSearch';
 import { TypeMark } from './ui';
 
 /** How many of the visitor's latest files the sidebar lists (the root loader asks for exactly this many). */
@@ -72,7 +73,8 @@ export function Sidebar({ recents }: { recents: OfficeDocument[] }) {
     <>
       <aside className="hidden w-60 shrink-0 flex-col gap-5 p-3 lg:flex">
         <Brand />
-        <LazyOmnibox />
+        <SidebarSearch />
+        <QuickActions />
         <nav aria-label="Main" className="flex flex-col gap-1">
           <NavItem to="/" exact icon="grid" label="All templates" />
           <NavItem to="/docx" icon="doc" label="Documents" />

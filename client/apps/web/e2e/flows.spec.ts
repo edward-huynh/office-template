@@ -229,29 +229,41 @@ test('Dia-style shell: the page scrolls inside its own panel, the rail stays put
   expect(await panel.evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).not.toBe('0px');
 });
 
-test('omnibox: jump to a template by typing, or use a quick action', async ({ page }) => {
+test('command palette finds templates and my files; the sidebar has two blank-file buttons', async ({ page }) => {
   await page.goto('/');
-  // Loaded lazily (on idle or when reached for): the real combobox replaces the look-alike.
-  await page.getByRole('textbox', { name: 'Search templates' }).first().hover().catch(() => undefined);
-  const omnibox = page.getByRole('combobox', { name: 'Search templates' });
-  await expect(omnibox).toBeVisible();
-  await omnibox.click();
-  await expect(page.getByRole('option', { name: 'New blank document' })).toBeVisible(); // quick actions with an empty box
-  await omnibox.fill('pitch');
+  const search = page.getByRole('button', { name: /Search or jump to/ });
+
+  // Template search (the palette loads lazily; the shortcut works before and after that).
+  await search.click();
+  const field = page.getByPlaceholder('Search templates and your files…');
+  await field.fill('pitch');
   await page.getByRole('option', { name: /Modern Pitch Deck/ }).click();
   await expect(page).toHaveURL(/\/pptx\/pitch-deck-modern$/);
 
+  // Quick actions are two plain buttons in the sidebar.
   await page.goto('/docx');
-  const again = page.getByRole('combobox', { name: 'Search templates' });
-  await again.click();
-  await page.getByRole('option', { name: 'New blank document' }).click();
+  await page.getByRole('button', { name: 'New blank document' }).click();
   await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('textbox', { name: 'Document content' })).toBeVisible();
 
+  // A file created earlier is found by name, with the keyboard shortcut.
   await page.goto('/');
-  const none = page.getByRole('combobox', { name: 'Search templates' });
-  await none.fill('zzzz-nothing');
-  await expect(page.getByText(/No templates match/)).toBeVisible();
+  await page.keyboard.press('ControlOrMeta+k');
+  await page.getByPlaceholder('Search templates and your files…').fill('blank');
+  await expect(page.getByRole('option').first()).toBeVisible();
+  await page.getByRole('option', { name: /Blank/ }).first().click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New blank presentation' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /Search or jump to/ }).click();
+  await page.getByPlaceholder('Search templates and your files…').fill('zzzz-nothing');
+  await expect(page.getByText('Nothing matches your search.')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Command palette' })).toHaveCount(0);
 });
 
 test('use a DOCX template, edit it, save and download', async ({ page }) => {

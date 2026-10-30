@@ -29,7 +29,7 @@
 - OpenAPI/Swagger generated from the validation schemas.
 - Anonymous per-session ownership of documents.
 - SSR for library, preview and "My files"; real HTTP 404s; Open Graph tags on preview pages.
-- Dia-style layout with an omnibox (beUI Combobox) and beUI Button, Input, Tabs, Select and Combobox throughout.
+- Dia-style layout with a command palette (beUI, Cmd/Ctrl+K) for templates and your files, two blank-file buttons, and beUI Button, Input, Tabs, Select and Combobox throughout.
 - DOCX/PPTX conversions run in a worker thread so large saves never stall the API; `pnpm perf` measures frames and long tasks.
 - Tests: 82 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 29 end-to-end tests (Playwright), typecheck for both packages.
 
