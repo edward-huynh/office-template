@@ -15,6 +15,8 @@ const envSchema = z.object({
   STORAGE_DIR: z.string().default('storage'),
   /** Import the catalog (idempotent) every time the server starts. Set to "false" to manage templates only through the admin API. */
   AUTO_SEED: z.enum(['true', 'false']).default('true'),
+  /** Worker threads for DOCX/PPTX conversions, so big documents never block the API. `0` runs them on the main thread. */
+  DOC_WORKERS: z.coerce.number().int().min(0).max(8).default(1),
   MAX_UPLOAD_MB: z.coerce.number().min(1).max(100).default(10),
   /** Token required by `/api/admin/*`. Mandatory in production. */
   ADMIN_TOKEN: z.string().min(8).optional(),

@@ -4,6 +4,8 @@ import { createApp } from './app.js';
 import { createDb } from './infra/db/client.js';
 import { createPreviewGenerator } from './infra/preview/preview-generator.js';
 import { LocalFileStore } from './infra/storage/file-store.js';
+import { DocumentPool } from './infra/workers/document-pool.js';
+import { pooledHandlers } from './doctypes/pooled.js';
 import { seedCatalog } from './modules/templates/seed-catalog.js';
 import { TemplateImporter } from './modules/templates/template-importer.js';
 import { TemplatesRepository } from './modules/templates/templates.repository.js';
@@ -34,12 +36,16 @@ if (env.AUTO_SEED === 'true') {
   }
 }
 
+const documentPool = new DocumentPool({ threads: env.DOC_WORKERS, logger });
+if (documentPool.threads > 0) logger.info(`Document conversions run in ${documentPool.threads} worker thread(s)`);
+
 const app = createApp({
   env,
   logger,
   db,
   templateStore,
   documentStore: new LocalFileStore(path.join(env.storageDir, 'documents')),
+  handlers: documentPool.threads > 0 ? pooledHandlers(documentPool) : undefined,
   previews: await createPreviewGenerator({ sofficePath: env.SOFFICE_PATH, pdftoppmPath: env.PDFTOPPM_PATH }, logger),
 });
 
@@ -47,4 +53,7 @@ const server = serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   logger.info(`API listening on http://localhost:${info.port} (docs: /api/docs)`);
 });
 
-registerGracefulShutdown(server as import('node:http').Server, logger, () => db.$client.close());
+registerGracefulShutdown(server as import('node:http').Server, logger, () => {
+  void documentPool.close();
+  db.$client.close();
+});

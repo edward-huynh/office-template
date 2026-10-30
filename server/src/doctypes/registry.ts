@@ -9,11 +9,14 @@ const handlers: DocTypeHandler[] = [docxHandler, pptxHandler];
 
 const byType = new Map<DocType, DocTypeHandler>(handlers.map((handler) => [handler.type, handler]));
 
-export function getHandler(type: DocType): DocTypeHandler {
+/** The real handlers. The worker thread uses these; the API's main thread goes through `getHandler` or a pool. */
+export function getBaseHandler(type: DocType): DocTypeHandler {
   const handler = byType.get(type);
   if (!handler) throw ApiError.badRequest(`Unsupported document type: ${type}`);
   return handler;
 }
+
+export const getHandler = getBaseHandler;
 
 /** Detects the document type from the file contents (never from the client-supplied name). */
 export async function detectDocType(file: Buffer): Promise<DocType> {

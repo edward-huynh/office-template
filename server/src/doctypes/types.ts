@@ -21,7 +21,8 @@ export interface DocTypeHandler {
 
   /** Rich-text types: the document as editor HTML, and back. */
   toEditorContent?(file: Buffer): Promise<EditorContent>;
-  fromEditorContent?(content: EditorContent): Promise<Buffer>;
+  /** Returns the DOCX and the sanitized HTML it was built from (kept so the editor can reopen it losslessly). */
+  fromEditorContent?(content: EditorContent): Promise<{ file: Buffer; html: string }>;
 
   /** Slide types: a render-ready model, and operations that return the modified file. */
   readSlides?(file: Buffer): Promise<Deck>;

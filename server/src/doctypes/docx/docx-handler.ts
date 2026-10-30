@@ -28,7 +28,7 @@ export const docxHandler: DocTypeHandler = {
     };
   },
 
-  async fromEditorContent({ html }): Promise<Buffer> {
+  async fromEditorContent({ html }) {
     const safe = sanitizeEditorHtml(html);
     const document = `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${safe}</body></html>`;
     const output = await HTMLtoDOCX(document, undefined, {
@@ -36,8 +36,11 @@ export const docxHandler: DocTypeHandler = {
       footer: false,
       pageNumber: false,
     });
-    if (Buffer.isBuffer(output)) return output;
-    if (output instanceof ArrayBuffer) return Buffer.from(output);
-    return Buffer.from(await (output as Blob).arrayBuffer());
+    const file = Buffer.isBuffer(output)
+      ? output
+      : output instanceof ArrayBuffer
+        ? Buffer.from(output)
+        : Buffer.from(await (output as Blob).arrayBuffer());
+    return { file, html: safe };
   },
 };
