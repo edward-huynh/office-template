@@ -38,7 +38,7 @@
 | Item | Notes |
 | --- | --- |
 | **Screen-recording video** | A required deliverable that cannot be produced by the code. It must be recorded separately. |
-| Document deletion / rename list actions | Documents can be created, opened, edited and downloaded. There is no delete endpoint. |
+| Document deletion | Documents can be created, opened, edited, renamed and downloaded. There is no delete endpoint. |
 | Template deletion and rollback | Templates can be added and updated (versioned) but not removed through the API. |
 | Real authentication | Sessions are anonymous cookies. Clearing cookies loses access to your files. The admin API uses one static token. |
 | Rate limiting, antivirus scanning, quotas | Uploads are validated and size-limited but not scanned. |

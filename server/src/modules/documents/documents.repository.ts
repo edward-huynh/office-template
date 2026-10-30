@@ -18,13 +18,13 @@ export class DocumentsRepository {
       .get();
   }
 
-  listByOwner(ownerSessionId: string): DocumentRow[] {
-    return this.db
+  listByOwner(ownerSessionId: string, limit?: number): DocumentRow[] {
+    const query = this.db
       .select()
       .from(documents)
       .where(eq(documents.ownerSessionId, ownerSessionId))
-      .orderBy(desc(documents.updatedAt))
-      .all();
+      .orderBy(desc(documents.updatedAt));
+    return (limit ? query.limit(limit) : query).all();
   }
 
   update(id: string, patch: Partial<Pick<DocumentRow, 'title' | 'sizeBytes' | 'updatedAt'>>): void {

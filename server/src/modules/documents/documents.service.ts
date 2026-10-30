@@ -1,6 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import type { ReadStream } from 'node:fs';
-import type { Deck, DocType, EditorContent, OfficeDocument, SlideEdits, UpdateDocumentInput } from '../../contracts/index.js';
+import type {
+  Deck,
+  DocType,
+  EditorContent,
+  OfficeDocument,
+  RenameDocumentInput,
+  SlideEdits,
+  UpdateDocumentInput,
+} from '../../contracts/index.js';
 import { getHandler } from '../../doctypes/registry.js';
 import type { DocTypeHandler } from '../../doctypes/types.js';
 import type { DocumentRow } from '../../infra/db/schema.js';
@@ -55,8 +63,16 @@ export class DocumentsService {
     return { id };
   }
 
-  list(ownerSessionId: string): OfficeDocument[] {
-    return this.repository.listByOwner(ownerSessionId).map((row) => this.toDto(row));
+  list(ownerSessionId: string, limit?: number): OfficeDocument[] {
+    return this.repository.listByOwner(ownerSessionId, limit).map((row) => this.toDto(row));
+  }
+
+  /** Renames the document only: the file and its content are untouched. */
+  rename(id: string, ownerSessionId: string, input: RenameDocumentInput): OfficeDocument {
+    const row = this.getOwned(id, ownerSessionId);
+    const patch = { title: input.title, updatedAt: new Date().toISOString() };
+    this.repository.update(row.id, patch);
+    return this.toDto({ ...row, ...patch });
   }
 
   get(id: string, ownerSessionId: string): OfficeDocument {

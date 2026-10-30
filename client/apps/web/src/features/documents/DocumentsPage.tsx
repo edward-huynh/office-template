@@ -3,6 +3,7 @@ import type { DocumentList, OfficeDocument } from '@office-template/server/contr
 import { EmptyState } from '#/components/states';
 import { buttonClass, TypeMark } from '#/components/ui';
 import { formatBytes, formatDate, typeLabel } from '#/lib/format';
+import { RenameTitle } from './RenameTitle';
 
 function DocumentCard({ document }: { document: OfficeDocument }) {
   const deck = document.type === 'pptx';
@@ -27,7 +28,7 @@ function DocumentCard({ document }: { document: OfficeDocument }) {
       <div className="flex flex-1 flex-col gap-1 p-4">
         <div className="flex items-center gap-2">
           <TypeMark type={document.type} />
-          <h2 className="truncate text-[15px] font-semibold">{document.title}</h2>
+          <RenameTitle id={document.id} title={document.title} />
         </div>
         <p className="text-xs text-slate-500">
           {typeLabel[document.type]} · Updated {formatDate(document.updatedAt)} · {formatBytes(document.sizeBytes)}

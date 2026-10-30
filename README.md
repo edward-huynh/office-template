@@ -48,7 +48,7 @@ Open <http://localhost:3000>. The API image includes LibreOffice (used to render
 1. For a blank file, click **Blank document** or **Blank presentation** under "Start from scratch" on the gallery. Otherwise, on the home gallery, hover a card (or use the type tabs and category chips), click **Preview** for a quick look in a modal (arrow keys move through slides), then **Use this template**. **Open full page** gives each template its own shareable URL.
 2. In the Word-style editor, select text and change the font, size, colour or alignment on the **Home** tab; click in a table to get the **Table Layout** tab. Press **Save** (or Ctrl/Cmd+S), then **Download DOCX**.
 3. **Presentations** → **Modern Pitch Deck** → **Use this template**. Click any text on the slide to edit it in place, format it on the **Home** tab, use **New Slide** / **Delete**, try **Present** (arrow keys, Esc to exit), then **Download PPTX**.
-4. **My files** lists everything created in this browser session.
+4. **My files** lists everything created in this browser session; the pencil next to a name renames it (Enter saves, Escape cancels). The sidebar's **Recent** list shows your 20 latest files.
 5. Prove the original is untouched: use the same template again; the new copy starts without your edits.
 6. Add a template: <http://localhost:3000/admin/templates> (token `dev-admin-token` in development).
 7. Turn JavaScript off: the library, search (a plain GET form), filters and preview pages still work, because they are server-rendered.

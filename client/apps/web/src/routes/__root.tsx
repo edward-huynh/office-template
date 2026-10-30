@@ -1,10 +1,14 @@
 /// <reference types="vite/client" />
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
-import { AppShell } from '#/components/Layout';
+import { AppShell, RECENT_LIMIT } from '#/components/Layout';
+import { fetchDocuments } from '#/lib/api';
 import appCss from '../styles.css?url';
 
 export const Route = createRootRoute({
+  // The sidebar's "Recent" list. Per visitor, so it loads with the visitor's cookie; a failure here must
+  // never break the page, the list is just left empty.
+  loader: () => fetchDocuments(RECENT_LIMIT).catch(() => ({ items: [] })),
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -21,9 +25,17 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  component: () => <Outlet />,
+  component: RootComponent,
   shellComponent: RootDocument,
 });
+
+function RootComponent() {
+  return (
+    <AppShell recents={Route.useLoaderData().items}>
+      <Outlet />
+    </AppShell>
+  );
+}
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
@@ -32,7 +44,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <AppShell>{children}</AppShell>
+        {children}
         <Scripts />
       </body>
     </html>

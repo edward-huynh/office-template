@@ -426,6 +426,42 @@ test('created documents appear in My files', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Download' }).first()).toBeVisible();
 });
 
+test('a file can be renamed in My files and the new name shows in the sidebar', async ({ page }) => {
+  await page.goto('/docx/invoice-simple');
+  await page.getByRole('button', { name: 'Use this template' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+
+  await page.goto('/documents');
+  await page.getByRole('button', { name: 'Rename Simple Invoice' }).click();
+  const field = page.getByRole('textbox', { name: 'Document name' });
+  await expect(field).toBeFocused();
+  await field.fill('Q3 invoice for Acme');
+  await field.press('Enter');
+
+  await expect(page.getByRole('heading', { name: 'Q3 invoice for Acme' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Main' }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Q3 invoice for Acme' })).toBeVisible(); // sidebar "Recent"
+
+  // Escape keeps the old name.
+  await page.getByRole('button', { name: 'Rename Q3 invoice for Acme' }).click();
+  await page.getByRole('textbox', { name: 'Document name' }).fill('Discarded');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('heading', { name: 'Q3 invoice for Acme' })).toBeVisible();
+  await expect(page.getByText('Discarded')).toHaveCount(0);
+});
+
+test('the sidebar lists at most the 20 most recent files', async ({ browser }) => {
+  const context = await browser.newContext();
+  for (let i = 0; i < 22; i++) {
+    const response = await context.request.post('/api/templates/business-letter/use');
+    expect(response.ok()).toBe(true);
+  }
+  const page = await context.newPage();
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: 'Recent' }).getByRole('link')).toHaveCount(20);
+  await context.close();
+});
+
 test('one visitor cannot open another visitor’s document', async ({ browser }) => {
   const owner = await browser.newContext();
   const ownerPage = await owner.newPage();

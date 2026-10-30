@@ -236,6 +236,8 @@ Behaviours worth knowing: ribbon controls keep the text selection (a `mousedown`
 
 The library follows a "modern gallery" style (hero search, type tabs, category chips, soft-shadow cards) inside an app shell with a left sidebar (a compact top bar with scrollable pills on small screens). The editors keep their Office look.
 
+- **Sidebar "Recent"** lists the visitor's 20 latest files. The root route's loader fetches them (`GET /api/documents?limit=20`, with the visitor's cookie, so it is server-rendered) and a failure just leaves the list empty. Renaming from My files calls `router.invalidate()`, which refreshes that list too.
+- **Buttons** show a pointer cursor and animate only on press (a small scale); there is no hover animation, only the colour change.
 - **Cards** show DOCX pages like a sheet of paper peeking out of a tinted frame and PPTX slides whole. Actions (Use template, Preview) appear on hover or focus on large screens and are always visible on small ones.
 - **Quick preview** is a native `<dialog>` (focus trap, Escape, inert background for free). A plain click on "Preview" opens it; a modified click (Ctrl/Cmd/Shift) or a request without JavaScript follows the real link to the template's own page, so every template keeps a shareable, server-rendered URL. For decks the arrow keys and a filmstrip move between slides; "Open full page" links to the dedicated route.
 - **Search** is a plain GET form that works without JavaScript. Once hydrated it updates the URL as you type; the input is uncontrolled so text typed before hydration finishes is kept and submitted.

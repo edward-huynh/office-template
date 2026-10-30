@@ -100,7 +100,11 @@ export const fetchTemplates = (search: TemplateSearch) =>
 export const fetchTemplate = (id: string) =>
   call<Template>(() => client().api.templates[':id'].$get({ param: { id } }));
 
-export const fetchDocuments = () => call<DocumentList>(() => client().api.documents.$get());
+export const fetchDocuments = (limit?: number) =>
+  call<DocumentList>(() => client().api.documents.$get({ query: limit ? { limit: String(limit) } : {} }));
+
+export const renameDocument = (id: string, title: string) =>
+  call<OfficeDocument>(() => client().api.documents[':id'].$patch({ param: { id }, json: { title } }));
 
 export const fetchDocument = (id: string) =>
   call<OfficeDocument>(() => client().api.documents[':id'].$get({ param: { id } }));

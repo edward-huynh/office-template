@@ -2,9 +2,11 @@ import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import {
   createdDocumentSchema,
   deckSchema,
+  documentListQuerySchema,
   documentListSchema,
   documentSchema,
   editorContentSchema,
+  renameDocumentSchema,
   slideEditsSchema,
   slugSchema,
   updateDocumentSchema,
@@ -34,6 +36,7 @@ const listRoute = createRoute({
   path: '/documents',
   tags: ['Documents'],
   summary: 'List documents of the current session',
+  request: { query: documentListQuerySchema },
   responses: { 200: jsonResponse(documentListSchema, 'Documents, most recently updated first') },
 });
 
@@ -46,6 +49,22 @@ const detailRoute = createRoute({
   responses: {
     200: jsonResponse(documentSchema, 'The document'),
     404: errorResponse('Document not found'),
+  },
+});
+
+const renameRoute = createRoute({
+  method: 'patch',
+  path: '/documents/{id}',
+  tags: ['Documents'],
+  summary: 'Rename a document',
+  request: {
+    params: idParam,
+    body: { required: true, content: { 'application/json': { schema: renameDocumentSchema } } },
+  },
+  responses: {
+    200: jsonResponse(documentSchema, 'The renamed document'),
+    404: errorResponse('Document not found'),
+    422: errorResponse('Invalid body'),
   },
 });
 
@@ -160,8 +179,11 @@ export const documentsRoutes = (documents: DocumentsService) =>
       const result = await documents.useTemplate(c.req.valid('param').id, c.get('sessionId'));
       return c.json(ok(result), 201);
     })
-    .openapi(listRoute, (c) => c.json(ok({ items: documents.list(c.get('sessionId')) }), 200))
+    .openapi(listRoute, (c) => c.json(ok({ items: documents.list(c.get('sessionId'), c.req.valid('query').limit) }), 200))
     .openapi(detailRoute, (c) => c.json(ok(documents.get(c.req.valid('param').id, c.get('sessionId'))), 200))
+    .openapi(renameRoute, (c) =>
+      c.json(ok(documents.rename(c.req.valid('param').id, c.get('sessionId'), c.req.valid('json'))), 200),
+    )
     .openapi(getContentRoute, async (c) =>
       c.json(ok(await documents.getContent(c.req.valid('param').id, c.get('sessionId'))), 200),
     )

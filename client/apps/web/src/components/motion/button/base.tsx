@@ -16,7 +16,6 @@ import {
   useState,
 } from "react";
 import { EASE_OUT, SPRING_PRESS } from "@/lib/ease";
-import { useHoverCapable } from "@/lib/hooks/use-hover-capable";
 import { cn } from "@/lib/utils";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "outline";
@@ -77,7 +76,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) {
     const reduce = useReducedMotion();
-    const canHover = useHoverCapable();
     const [ripples, setRipples] = useState<Ripple[]>([]);
     const nextId = useRef(0);
 
@@ -107,11 +105,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         type="button"
         whileTap={reduce ? undefined : { scale: pressScale }}
-        whileHover={reduce || !canHover ? undefined : { scale: 1.02 }}
         transition={SPRING_PRESS}
         onPointerDown={handlePointerDown}
         className={cn(
-          "inline-flex items-center justify-center font-medium select-none",
+          "inline-flex cursor-pointer items-center justify-center font-medium select-none",
           "transition-colors",
           "disabled:pointer-events-none disabled:opacity-50",
           ripple && "relative overflow-hidden",
@@ -167,16 +164,14 @@ export const ButtonLink = forwardRef<HTMLAnchorElement, ButtonLinkProps>(
     ref,
   ) {
     const reduce = useReducedMotion();
-    const canHover = useHoverCapable();
 
     return (
       <m.a
         ref={ref}
         whileTap={reduce ? undefined : { scale: pressScale }}
-        whileHover={reduce || !canHover ? undefined : { scale: 1.02 }}
         transition={SPRING_PRESS}
         className={cn(
-          "inline-flex items-center justify-center font-medium select-none",
+          "inline-flex cursor-pointer items-center justify-center font-medium select-none",
           "transition-colors",
           VARIANT_CLASS[variant],
           SIZE_CLASS[size],

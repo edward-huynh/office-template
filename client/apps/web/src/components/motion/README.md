@@ -14,6 +14,7 @@ Runtime dependencies: `motion`, `lucide-react`, `clsx`, `tailwind-merge`. Theme 
 | File | Change | Why |
 | --- | --- | --- |
 | all `*.tsx` | `motion.<tag>` → `m.<tag>`, import `m` instead of `motion` | The app wraps everything in `<LazyMotion strict>`; the animation features load asynchronously (`src/lib/motion-features.ts`), which keeps about 25 KB gzip off the critical path |
+| `button/base.tsx` | remove `whileHover` scale (press scale kept), add `cursor-pointer` | Buttons do not animate on hover; the pointer cursor is explicit |
 | `button/base.tsx` | export `VARIANT_CLASS` and `SIZE_CLASS` | Link-styled buttons (router links) reuse the same classes (`buttonClass` in `components/ui.tsx`) |
 | `input.tsx` | uncontrolled mode passes `defaultValue` to the `<input>` instead of a controlled `value` | Text typed before hydration finishes is not wiped when React attaches (the gallery search relies on it) |
 | `select.tsx` | `SelectTrigger` accepts `aria-label` | The visible text is only the current value, so it needs an accessible name |
