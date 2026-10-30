@@ -1,0 +1,17 @@
+{
+  "id": "quarterly-business-review",
+  "type": "pptx",
+  "name": "Quarterly Business Review",
+  "category": "Reports",
+  "description": "A clean light deck for results, highlights, lessons and next-quarter priorities.",
+  "file": "template.pptx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png",
+    "pages/2.png",
+    "pages/3.png",
+    "pages/4.png",
+    "pages/5.png",
+    "pages/6.png"
+  ]
+}

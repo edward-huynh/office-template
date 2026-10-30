@@ -1,0 +1,12 @@
+{
+  "id": "resume-modern",
+  "type": "docx",
+  "name": "Modern Resume",
+  "category": "Career",
+  "description": "A clean one-page resume with summary, experience, education and skills.",
+  "file": "template.docx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}

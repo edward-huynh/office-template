@@ -1,0 +1,16 @@
+{
+  "id": "product-launch",
+  "type": "pptx",
+  "name": "Product Launch Plan",
+  "category": "Marketing",
+  "description": "A bold deck for launch goals, audience, messaging, channels and timeline.",
+  "file": "template.pptx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png",
+    "pages/2.png",
+    "pages/3.png",
+    "pages/4.png",
+    "pages/5.png"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "id": "weekly-status-report",
+  "type": "docx",
+  "name": "Weekly Status Report",
+  "category": "Reports",
+  "description": "Progress, blockers and next steps in a format teams can fill in five minutes.",
+  "file": "template.docx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}

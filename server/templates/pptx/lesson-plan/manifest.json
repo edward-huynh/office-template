@@ -1,0 +1,16 @@
+{
+  "id": "lesson-plan",
+  "type": "pptx",
+  "name": "Lesson Plan",
+  "category": "Education",
+  "description": "A warm, friendly deck for teaching a topic: goals, key ideas, practice and recap.",
+  "file": "template.pptx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png",
+    "pages/2.png",
+    "pages/3.png",
+    "pages/4.png",
+    "pages/5.png"
+  ]
+}

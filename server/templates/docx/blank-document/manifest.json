@@ -1,0 +1,13 @@
+{
+  "id": "blank-document",
+  "type": "docx",
+  "name": "Blank document",
+  "category": "Blank",
+  "description": "An empty page to start writing.",
+  "hidden": true,
+  "file": "template.docx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}
