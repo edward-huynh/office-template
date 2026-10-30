@@ -1,0 +1,22 @@
+{
+  "name": "office-template",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Office template library: DOCX documents and PPTX presentations created from templates.",
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "pnpm --filter @office-template/web build && pnpm --parallel --filter @office-template/server --filter @office-template/web start",
+    "dev": "pnpm --parallel --filter @office-template/server --filter @office-template/web dev",
+    "dev:server": "pnpm --filter @office-template/server dev",
+    "dev:web": "pnpm --filter @office-template/web dev",
+    "generate:templates": "pnpm --filter @office-template/server generate:templates",
+    "seed": "pnpm --filter @office-template/server seed",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @office-template/server test",
+    "test:e2e": "pnpm --filter @office-template/web test:e2e"
+  }
+}

@@ -1,0 +1,8 @@
+packages:
+  - server
+  - client/apps/*
+
+onlyBuiltDependencies:
+  - better-sqlite3
+  - esbuild
+  - "@resvg/resvg-js"

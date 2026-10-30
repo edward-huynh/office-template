@@ -1,0 +1,13 @@
+node_modules
+dist
+.output
+.vinxi
+.tanstack
+*.log
+.env
+.env.local
+server/storage/
+server/data/
+client/apps/web/test-results
+client/apps/web/playwright-report
+.DS_Store
