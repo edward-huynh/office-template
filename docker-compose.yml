@@ -1,0 +1,31 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      # Demo value so the stack starts out of the box. Set ADMIN_TOKEN in your environment for anything real.
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-docker-demo-admin-token}
+    volumes:
+      - office-data:/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  web:
+    build:
+      context: .
+      dockerfile: client/apps/web/Dockerfile
+    environment:
+      API_INTERNAL_URL: http://server:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      server:
+        condition: service_healthy
+
+volumes:
+  office-data:
