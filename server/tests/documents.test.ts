@@ -64,6 +64,49 @@ describe('copy-on-use', () => {
   });
 });
 
+describe('renaming and listing', () => {
+  const patch = (session: ReturnType<typeof ctx.session>, id: string, body: unknown) =>
+    session.json(`/api/documents/${id}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+  it('renames a document without touching its file, and the download uses the new name', async () => {
+    const session = ctx.session();
+    const id = (await useTemplate(session, 'invoice-simple')).body.data.id as string;
+    const before = sha256(await ctx.documentStore.read(`${id}.docx`));
+
+    const renamed = await patch(session, id, { title: '  Q3 invoice  ' });
+    expect(renamed.status).toBe(200);
+    expect(renamed.body.data.title).toBe('Q3 invoice');
+    expect(sha256(await ctx.documentStore.read(`${id}.docx`))).toBe(before);
+
+    const download = await session.request(`/api/documents/${id}/download`);
+    expect(download.headers.get('content-disposition')).toContain('Q3-invoice.docx');
+    await download.arrayBuffer();
+  });
+
+  it('rejects an empty title and a document of another session', async () => {
+    const owner = ctx.session();
+    const id = (await useTemplate(owner, 'invoice-simple')).body.data.id as string;
+    expect((await patch(owner, id, { title: '   ' })).status).toBe(422);
+    expect((await patch(ctx.session(), id, { title: 'Mine now' })).status).toBe(404);
+  });
+
+  it('limits the list, most recently updated first', async () => {
+    const session = ctx.session();
+    for (let i = 0; i < 3; i++) await useTemplate(session, 'business-letter');
+    const newest = (await useTemplate(session, 'invoice-simple')).body.data.id as string;
+    await patch(session, newest, { title: 'Newest' });
+
+    const limited = await session.json('/api/documents?limit=2');
+    expect(limited.body.data.items).toHaveLength(2);
+    expect(limited.body.data.items[0].title).toBe('Newest');
+    expect((await session.json('/api/documents?limit=0')).status).toBe(422);
+  });
+});
+
 describe('session ownership', () => {
   it("hides one session's documents from another", async () => {
     const owner = ctx.session();

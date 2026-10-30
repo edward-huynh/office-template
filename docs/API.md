@@ -94,7 +94,7 @@ Creates a copy of the template for the current session. The template is not modi
 
 ### `GET /api/documents`
 
-Documents of the current session, most recently updated first.
+Documents of the current session, most recently updated first. Optional query `limit` (1–100) returns only the latest N; the web app's sidebar asks for 20.
 
 ```json
 {
@@ -124,6 +124,10 @@ Documents of the current session, most recently updated first.
 ### `GET /api/documents/{id}`
 
 One document. `404` if it does not exist or belongs to another session.
+
+### `PATCH /api/documents/{id}`
+
+Renames a document. Body: `{ "title": "Q3 invoice" }` (trimmed, 1–120 characters). Returns the updated document; the file itself is not touched, and the download file name follows the new title. `404` if it does not exist or belongs to another session, `422` for an empty title.
 
 ### `GET /api/documents/{id}/content`
 

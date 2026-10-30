@@ -23,16 +23,15 @@ async function readDownload(download: import('@playwright/test').Download) {
   return fs.readFile(file);
 }
 
-test('browse, search and filter the document library', async ({ page }) => {
+test('browse and filter the document library (search links and the Clear filters link)', async ({ page }) => {
   await page.goto('/docx');
   await expect(page.getByRole('heading', { name: 'Document templates' })).toBeVisible();
 
-  await page.getByRole('searchbox', { name: 'Search templates' }).fill('minutes');
-  await expect(page).toHaveURL(/q=minutes/);
+  await page.goto('/docx?q=minutes');
   await expect(page.getByRole('heading', { name: 'Meeting Minutes' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Business Letter' })).toHaveCount(0);
 
-  await page.getByRole('searchbox', { name: 'Search templates' }).fill('no-such-template-xyz');
+  await page.goto('/docx?q=no-such-template-xyz');
   await expect(page.getByText('No templates match your search')).toBeVisible();
   await page.getByRole('link', { name: 'Clear filters' }).click();
   await expect(page.getByRole('heading', { name: 'Business Letter' })).toBeVisible();
@@ -229,29 +228,47 @@ test('Dia-style shell: the page scrolls inside its own panel, the rail stays put
   expect(await panel.evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).not.toBe('0px');
 });
 
-test('omnibox: jump to a template by typing, or use a quick action', async ({ page }) => {
+test('command palette finds templates and my files; plus-circles in the sidebar create blank files', async ({ page }) => {
   await page.goto('/');
-  // Loaded lazily (on idle or when reached for): the real combobox replaces the look-alike.
-  await page.getByRole('textbox', { name: 'Search templates' }).first().hover().catch(() => undefined);
-  const omnibox = page.getByRole('combobox', { name: 'Search templates' });
-  await expect(omnibox).toBeVisible();
-  await omnibox.click();
-  await expect(page.getByRole('option', { name: 'New blank document' })).toBeVisible(); // quick actions with an empty box
-  await omnibox.fill('pitch');
+  const search = page.getByRole('button', { name: /Search or jump to/ });
+
+  // Template search (the palette loads lazily; the shortcut works before and after that).
+  await search.click();
+  const field = page.getByPlaceholder('Search templates and your files…');
+  await field.fill('pitch');
   await page.getByRole('option', { name: /Modern Pitch Deck/ }).click();
   await expect(page).toHaveURL(/\/pptx\/pitch-deck-modern$/);
 
+  // The plus-circle next to Documents / Presentations in the sidebar creates a blank file.
   await page.goto('/docx');
-  const again = page.getByRole('combobox', { name: 'Search templates' });
-  await again.click();
-  await page.getByRole('option', { name: 'New blank document' }).click();
+  await page.getByRole('button', { name: 'New blank document' }).click();
   await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('textbox', { name: 'Document content' })).toBeVisible();
 
+  // Going back: the plus-circle is usable again, not stuck on its spinner.
+  await page.goBack();
+  await expect(page).toHaveURL(/\/docx$/);
+  await expect(page.getByRole('button', { name: 'New blank document' })).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.getByRole('button', { name: 'New blank document' })).toBeEnabled();
+
+  // A file created earlier is found by name, with the keyboard shortcut.
   await page.goto('/');
-  const none = page.getByRole('combobox', { name: 'Search templates' });
-  await none.fill('zzzz-nothing');
-  await expect(page.getByText(/No templates match/)).toBeVisible();
+  await page.keyboard.press('ControlOrMeta+k');
+  await page.getByPlaceholder('Search templates and your files…').fill('blank');
+  await expect(page.getByRole('option').first()).toBeVisible();
+  await page.getByRole('option', { name: /Blank/ }).first().click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New blank presentation' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+
+  await page.goto('/');
+  await page.getByRole('button', { name: /Search or jump to/ }).click();
+  await page.getByPlaceholder('Search templates and your files…').fill('zzzz-nothing');
+  await expect(page.getByText('Nothing matches your search.')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog', { name: 'Command palette' })).toHaveCount(0);
 });
 
 test('use a DOCX template, edit it, save and download', async ({ page }) => {
@@ -424,6 +441,42 @@ test('created documents appear in My files', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'My files' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Download' }).first()).toBeVisible();
+});
+
+test('a file can be renamed in My files and the new name shows in the sidebar', async ({ page }) => {
+  await page.goto('/docx/invoice-simple');
+  await page.getByRole('button', { name: 'Use this template' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+
+  await page.goto('/documents');
+  await page.getByRole('button', { name: 'Rename Simple Invoice' }).click();
+  const field = page.getByRole('textbox', { name: 'Document name' });
+  await expect(field).toBeFocused();
+  await field.fill('Q3 invoice for Acme');
+  await field.press('Enter');
+
+  await expect(page.getByRole('heading', { name: 'Q3 invoice for Acme' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Main' }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Q3 invoice for Acme' })).toBeVisible(); // sidebar "Recent"
+
+  // Escape keeps the old name.
+  await page.getByRole('button', { name: 'Rename Q3 invoice for Acme' }).click();
+  await page.getByRole('textbox', { name: 'Document name' }).fill('Discarded');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('heading', { name: 'Q3 invoice for Acme' })).toBeVisible();
+  await expect(page.getByText('Discarded')).toHaveCount(0);
+});
+
+test('the sidebar lists at most the 20 most recent files', async ({ browser }) => {
+  const context = await browser.newContext();
+  for (let i = 0; i < 22; i++) {
+    const response = await context.request.post('/api/templates/business-letter/use');
+    expect(response.ok()).toBe(true);
+  }
+  const page = await context.newPage();
+  await page.goto('/');
+  await expect(page.getByRole('region', { name: 'Recent' }).getByRole('link')).toHaveCount(20);
+  await context.close();
 });
 
 test('one visitor cannot open another visitor’s document', async ({ browser }) => {

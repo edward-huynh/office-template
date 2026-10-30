@@ -3,8 +3,8 @@
 A working template gallery for Office documents. Pick a **Word (DOCX)** or **PowerPoint (PPTX)** template, preview it, and create your own copy. Both types open in an editor modelled on Word and PowerPoint (ribbon, page or slide canvas, status bar) and download as standard Office files. The original templates are never modified.
 
 - **Blank files**: "Start from scratch" tiles create a blank document (an empty Word-style page) or a blank presentation (one slide with empty title and content boxes).
-- **Layout**: a Dia-style window: a tinted backdrop with the navigation rail directly on it (including an address-bar style search box that jumps to a template or starts a blank file), and the page as one rounded floating panel.
-- **Gallery**: a modern template gallery: sidebar navigation, a hero with a large search, All / Documents / Presentations tabs, category chips, rounded thumbnail cards with hover actions, a quick-preview modal, and a "continue where you left off" row of your recent files.
+- **Layout**: a Dia-style window: a tinted backdrop with the navigation rail directly on it (a search box that opens a command palette, Cmd/Ctrl+K, to find templates and your files, and a plus-circle on Documents and Presentations that starts a blank file), and the page as one rounded floating panel.
+- **Gallery**: a modern template gallery: sidebar navigation, a hero banner, All / Documents / Presentations tabs, category chips, rounded thumbnail cards with hover actions, a quick-preview modal, and a "continue where you left off" row of your recent files.
 - **Documents**: 6 sample templates, searchable and filterable, edited in a Word-style editor (fonts, sizes, colours, alignment, lists, tables, ruler, page count, zoom).
 - **Presentations**: 4 sample decks with slide-by-slide preview, edited in a PowerPoint-style editor (thumbnails, in-place text editing and formatting, new/delete slide, slide show).
 - **One platform** behind both: a `type` field, a shared API, and a registry that makes new Office types an additive change.
@@ -48,10 +48,10 @@ Open <http://localhost:3000>. The API image includes LibreOffice (used to render
 1. For a blank file, click **Blank document** or **Blank presentation** under "Start from scratch" on the gallery. Otherwise, on the home gallery, hover a card (or use the type tabs and category chips), click **Preview** for a quick look in a modal (arrow keys move through slides), then **Use this template**. **Open full page** gives each template its own shareable URL.
 2. In the Word-style editor, select text and change the font, size, colour or alignment on the **Home** tab; click in a table to get the **Table Layout** tab. Press **Save** (or Ctrl/Cmd+S), then **Download DOCX**.
 3. **Presentations** → **Modern Pitch Deck** → **Use this template**. Click any text on the slide to edit it in place, format it on the **Home** tab, use **New Slide** / **Delete**, try **Present** (arrow keys, Esc to exit), then **Download PPTX**.
-4. **My files** lists everything created in this browser session.
+4. **My files** lists everything created in this browser session; the pencil next to a name renames it (Enter saves, Escape cancels). The sidebar's **Recent** list shows your 20 latest files.
 5. Prove the original is untouched: use the same template again; the new copy starts without your edits.
 6. Add a template: <http://localhost:3000/admin/templates> (token `dev-admin-token` in development).
-7. Turn JavaScript off: the library, search (a plain GET form), filters and preview pages still work, because they are server-rendered.
+7. Turn JavaScript off: the library, filters, `?q=` search URLs and preview pages still work, because they are server-rendered.
 
 ## Commands
 

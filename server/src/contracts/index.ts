@@ -111,6 +111,11 @@ export const updateDocumentSchema = z.object({
 });
 export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 
+export const renameDocumentSchema = z.object({ title: z.string().trim().min(1).max(120) });
+export type RenameDocumentInput = z.infer<typeof renameDocumentSchema>;
+
+export const documentListQuerySchema = z.object({ limit: z.coerce.number().int().min(1).max(100).optional() });
+
 // ------------------------------------------------------------------- slides
 
 /** Sizes are CSS pixels at 96 dpi (EMU / 9525); font sizes are points. */

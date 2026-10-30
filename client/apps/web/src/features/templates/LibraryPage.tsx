@@ -1,11 +1,9 @@
 import { useNavigate } from '@tanstack/react-router';
 import type { LibrarySearch, OfficeDocument, Template, TemplateList } from '@office-template/server/contracts';
-import { useEffect, useRef, useState } from 'react';
-import { Search as SearchIcon } from 'lucide-react';
-import { Input } from '@/components/motion/input';
+import { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs';
 import { EmptyState } from '#/components/states';
-import { Button, buttonClass } from '#/components/ui';
+import { buttonClass } from '#/components/ui';
 import { BlankTiles } from './BlankTiles';
 import { LibraryLink, type GalleryType } from './links';
 import { QuickPreview } from './QuickPreview';
@@ -17,77 +15,6 @@ const COPY: Record<GalleryType, { title: string; lead: string }> = {
   docx: { title: 'Document templates', lead: 'Letters, reports, invoices and more. Edit in a Word-style editor, then download a DOCX.' },
   pptx: { title: 'Presentation templates', lead: 'Designed slide decks for pitches, reviews and lessons. Edit the slides, present, download a PPTX.' },
 };
-
-/**
- * Search box. Works without JavaScript (a plain GET form that reloads the page with `?q=`); once
- * hydrated it updates the URL as you type and the route loader refetches. The beUI input is used
- * uncontrolled, so text typed before the page finished hydrating is kept.
- */
-function SearchBar({ type, search }: { type: GalleryType; search: LibrarySearch }) {
-  const navigate = useNavigate();
-  const input = useRef<HTMLInputElement>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-
-  const go = (q: string, replace: boolean) => {
-    const next = { q: q.trim() || undefined, category: search.category, page: undefined };
-    if (type === 'all') return navigate({ to: '/', search: next, replace });
-    return type === 'docx'
-      ? navigate({ to: '/docx', search: next, replace })
-      : navigate({ to: '/pptx', search: next, replace });
-  };
-
-  const schedule = () => {
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      const value = input.current?.value ?? '';
-      if (value.trim() !== (search.q ?? '')) void go(value, true);
-    }, 350);
-  };
-
-  // Typed before hydration: pick it up now.
-  useEffect(() => {
-    if (input.current && input.current.value.trim() !== (search.q ?? '')) schedule();
-    return () => clearTimeout(timer.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // The URL changed from elsewhere (Clear filters, back button): reflect it unless the user is typing.
-  useEffect(() => {
-    const el = input.current;
-    if (el && window.document.activeElement !== el) el.value = search.q ?? '';
-  }, [search.q]);
-
-  return (
-    <form
-      role="search"
-      method="get"
-      action={type === 'all' ? '/' : `/${type}`}
-      onSubmit={(event) => {
-        event.preventDefault();
-        clearTimeout(timer.current);
-        void go(input.current?.value ?? '', false);
-      }}
-      className="flex w-full items-center gap-2"
-    >
-      {search.category ? <input type="hidden" name="category" value={search.category} /> : null}
-      <Input
-        ref={input}
-        name="q"
-        type="search"
-        aria-label="Search templates"
-        defaultValue={search.q ?? ''}
-        onChange={schedule}
-        placeholder="Search templates, e.g. invoice, pitch, resume"
-        leftIcon={<SearchIcon />}
-        className="min-w-0 flex-1"
-        classNames={{ field: 'h-12 border-transparent bg-white ', input: 'text-[15px]' }}
-      />
-      <Button type="submit" size="lg" variant="light">
-        Search
-      </Button>
-    </form>
-  );
-}
 
 /** Document type switch. A beUI segmented control: it needs JavaScript to switch (the lists themselves are server-rendered). */
 function TypeTabs({ type, search }: { type: GalleryType; search: LibrarySearch }) {
@@ -187,15 +114,14 @@ export function LibraryPage({
   const filtered = Boolean(search.q || search.category);
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 p-6 text-white sm:p-8">
+      <section className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-700 p-6 text-white sm:p-8">
         <div aria-hidden className="pointer-events-none absolute -right-16 -top-20 size-72 rounded-full bg-white/10 blur-2xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-40 size-64 rounded-full bg-fuchsia-400/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-24 right-40 size-64 rounded-full bg-lime-300/15 blur-3xl" />
         <div className="relative space-y-6">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{COPY[type].title}</h1>
-            <p className="text-indigo-100">{COPY[type].lead}</p>
+            <p className="text-emerald-100">{COPY[type].lead}</p>
           </div>
-          <SearchBar type={type} search={search} />
         </div>
       </section>
 

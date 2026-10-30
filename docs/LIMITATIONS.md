@@ -29,7 +29,7 @@
 - OpenAPI/Swagger generated from the validation schemas.
 - Anonymous per-session ownership of documents.
 - SSR for library, preview and "My files"; real HTTP 404s; Open Graph tags on preview pages.
-- Dia-style layout with an omnibox (beUI Combobox) and beUI Button, Input, Tabs, Select and Combobox throughout.
+- Dia-style layout with a command palette (beUI, Cmd/Ctrl+K) for templates and your files, plus-circles on Documents and Presentations that create blank files, and beUI Button, Input, Tabs, Select and Combobox throughout.
 - DOCX/PPTX conversions run in a worker thread so large saves never stall the API; `pnpm perf` measures frames and long tasks.
 - Tests: 82 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 29 end-to-end tests (Playwright), typecheck for both packages.
 
@@ -38,7 +38,7 @@
 | Item | Notes |
 | --- | --- |
 | **Screen-recording video** | A required deliverable that cannot be produced by the code. It must be recorded separately. |
-| Document deletion / rename list actions | Documents can be created, opened, edited and downloaded. There is no delete endpoint. |
+| Document deletion | Documents can be created, opened, edited, renamed and downloaded. There is no delete endpoint. |
 | Template deletion and rollback | Templates can be added and updated (versioned) but not removed through the API. |
 | Real authentication | Sessions are anonymous cookies. Clearing cookies loses access to your files. The admin API uses one static token. |
 | Rate limiting, antivirus scanning, quotas | Uploads are validated and size-limited but not scanned. |
