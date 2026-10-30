@@ -1,9 +1,11 @@
 import { useNavigate } from '@tanstack/react-router';
 import type { LibrarySearch, OfficeDocument, Template, TemplateList } from '@office-template/server/contracts';
 import { useEffect, useRef, useState } from 'react';
-import { Icon } from '#/components/icons';
+import { Search as SearchIcon } from 'lucide-react';
+import { Input } from '@/components/motion/input';
+import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs';
 import { EmptyState } from '#/components/states';
-import { buttonClass } from '#/components/ui';
+import { Button, buttonClass } from '#/components/ui';
 import { BlankTiles } from './BlankTiles';
 import { LibraryLink, type GalleryType } from './links';
 import { QuickPreview } from './QuickPreview';
@@ -18,11 +20,11 @@ const COPY: Record<GalleryType, { title: string; lead: string }> = {
 
 /**
  * Search box. Works without JavaScript (a plain GET form that reloads the page with `?q=`); once
- * hydrated it updates the URL as you type and the route loader refetches.
+ * hydrated it updates the URL as you type and the route loader refetches. The beUI input is used
+ * uncontrolled, so text typed before the page finished hydrating is kept.
  */
 function SearchBar({ type, search }: { type: GalleryType; search: LibrarySearch }) {
   const navigate = useNavigate();
-  // Uncontrolled on purpose: text typed before the page finished hydrating must not be wiped.
   const input = useRef<HTMLInputElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -65,46 +67,60 @@ function SearchBar({ type, search }: { type: GalleryType; search: LibrarySearch 
         clearTimeout(timer.current);
         void go(input.current?.value ?? '', false);
       }}
-      className="flex w-full max-w-2xl items-center gap-2 rounded-full bg-white p-1.5 pl-5 shadow-lg shadow-indigo-900/20"
+      className="flex w-full max-w-2xl items-center gap-2"
     >
       {search.category ? <input type="hidden" name="category" value={search.category} /> : null}
-      <Icon name="search" className="shrink-0 text-slate-400" />
-      <label className="sr-only" htmlFor="template-search">
-        Search templates
-      </label>
-      <input
+      <Input
         ref={input}
-        id="template-search"
         name="q"
         type="search"
+        aria-label="Search templates"
         defaultValue={search.q ?? ''}
         onChange={schedule}
         placeholder="Search templates, e.g. invoice, pitch, resume"
-        className="min-w-0 flex-1 bg-transparent py-2 text-[15px] text-slate-900 outline-none placeholder:text-slate-400"
+        leftIcon={<SearchIcon />}
+        className="min-w-0 flex-1"
+        classNames={{ field: 'h-12 border-transparent bg-white shadow-lg shadow-indigo-900/20', input: 'text-[15px]' }}
       />
-      <button type="submit" className={buttonClass()}>
+      <Button type="submit" size="lg" variant="light">
         Search
-      </button>
+      </Button>
     </form>
   );
 }
 
+/** Document type switch. A beUI segmented control: it needs JavaScript to switch (the lists themselves are server-rendered). */
 function TypeTabs({ type, search }: { type: GalleryType; search: LibrarySearch }) {
-  const tab = (active: boolean) =>
-    `rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${active ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-200/70'}`;
+  const navigate = useNavigate();
   const q = { q: search.q };
+  const go = (next: string) => {
+    if (next === 'all') void navigate({ to: '/', search: q });
+    else if (next === 'docx') void navigate({ to: '/docx', search: q });
+    else void navigate({ to: '/pptx', search: q });
+  };
   return (
-    <nav aria-label="Template type" className="inline-flex gap-1 rounded-full bg-slate-100 p-1">
-      <LibraryLink type="all" search={q} className={tab(type === 'all')} aria-current={type === 'all' ? 'page' : undefined}>
-        All
-      </LibraryLink>
-      <LibraryLink type="docx" search={q} className={tab(type === 'docx')} aria-current={type === 'docx' ? 'page' : undefined}>
-        Documents
-      </LibraryLink>
-      <LibraryLink type="pptx" search={q} className={tab(type === 'pptx')} aria-current={type === 'pptx' ? 'page' : undefined}>
-        Presentations
-      </LibraryLink>
-    </nav>
+    <>
+      <Tabs value={type} onValueChange={go} variant="segment">
+        <TabsList aria-label="Template type">
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="docx">Documents</TabsTrigger>
+          <TabsTrigger value="pptx">Presentations</TabsTrigger>
+        </TabsList>
+      </Tabs>
+      <noscript>
+        <nav aria-label="Template type (without JavaScript)" className="flex gap-3 text-sm">
+          <LibraryLink type="all" search={q}>
+            All
+          </LibraryLink>
+          <LibraryLink type="docx" search={q}>
+            Documents
+          </LibraryLink>
+          <LibraryLink type="pptx" search={q}>
+            Presentations
+          </LibraryLink>
+        </nav>
+      </noscript>
+    </>
   );
 }
 

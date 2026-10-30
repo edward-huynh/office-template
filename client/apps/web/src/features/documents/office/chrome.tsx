@@ -1,19 +1,26 @@
 import { Link } from '@tanstack/react-router';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { Combobox, ComboboxContent, ComboboxEmpty, ComboboxInput, ComboboxItem, ComboboxList, ComboboxTrigger } from '@/components/motion/combobox';
+import { Input } from '@/components/motion/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/motion/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/motion/tabs';
+import { Button } from '#/components/ui';
+import { cn } from '@/lib/utils';
 import { Icon, type IconName } from './icons';
 
 /**
  * Office-style application chrome shared by the Word and PowerPoint editors: a coloured title bar,
- * a tabbed ribbon with labelled groups, and a status bar.
+ * a tabbed ribbon with labelled groups, and a status bar. Controls are beUI components (Button,
+ * Input, Tabs, Select, Combobox) restyled to fit the ribbon.
  */
 export type OfficeApp = 'word' | 'powerpoint';
 
 const THEME = {
-  word: { bar: 'bg-[#2b579a]', accent: 'text-[#2b579a]', accentBorder: 'border-[#2b579a]', ring: 'ring-[#2b579a]', glyph: 'W', name: 'Word', soft: 'bg-[#cfdcf0]' },
-  powerpoint: { bar: 'bg-[#b7472a]', accent: 'text-[#b7472a]', accentBorder: 'border-[#b7472a]', ring: 'ring-[#b7472a]', glyph: 'P', name: 'PowerPoint', soft: 'bg-[#f7d9d0]' },
+  word: { bar: 'bg-[#2b579a]', accent: 'text-[#2b579a]', glyph: 'W', indicator: 'bg-[#2b579a]' },
+  powerpoint: { bar: 'bg-[#b7472a]', accent: 'text-[#b7472a]', glyph: 'P', indicator: 'bg-[#b7472a]' },
 } as const;
 
-/** Full-window editor surface that sits above the site header. */
+/** Full-window editor surface that sits above the app shell. */
 export function EditorShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -52,28 +59,25 @@ export function TitleBar({
       <span aria-hidden className="grid size-7 place-items-center rounded-sm bg-white text-sm font-black" style={{ color: app === 'word' ? '#2b579a' : '#b7472a' }}>
         {theme.glyph}
       </span>
-      <label className="sr-only" htmlFor="doc-title">
-        Title
-      </label>
-      <input
+      <Input
         id="doc-title"
+        aria-label="Title"
         value={title}
         maxLength={120}
-        onChange={(event) => onTitleChange(event.target.value)}
-        className="min-w-0 max-w-md flex-1 rounded bg-transparent px-2 py-1 text-sm font-semibold text-white outline-none hover:bg-white/10 focus:bg-white/20"
+        onChange={onTitleChange}
+        className="min-w-0 max-w-md flex-1"
+        classNames={{
+          field: 'h-8 rounded-md border-transparent bg-transparent hover:bg-white/10 focus-within:bg-white/20 focus-within:ring-white/40',
+          input: 'pl-2 text-sm font-semibold text-white caret-white',
+        }}
       />
       <span role="status" className={`hidden text-xs sm:inline ${status === 'error' ? 'font-semibold text-yellow-200' : 'text-white/80'}`}>
         {statusText}
       </span>
       <div className="ml-auto flex items-center gap-1">
-        <button
-          type="button"
-          onClick={onSave}
-          disabled={status === 'saving' || status === 'saved'}
-          className="flex items-center gap-1.5 rounded px-3 py-1.5 text-sm hover:bg-white/15 disabled:opacity-50"
-        >
+        <Button variant="ghost" size="sm" onClick={onSave} disabled={status === 'saving' || status === 'saved'} className="text-white hover:bg-white/15 hover:text-white">
           <Icon name="save" /> Save
-        </button>
+        </Button>
         {actions}
       </div>
     </header>
@@ -93,39 +97,33 @@ export function Ribbon({ app, tabs, activeId, onActivate }: { app: OfficeApp; ta
   const active = tabs.find((tab) => tab.id === activeId) ?? tabs[0]!;
   return (
     <div className="border-b border-slate-300 bg-white">
-      <div role="tablist" aria-label="Ribbon" className="flex gap-0.5 bg-[#f3f3f3] px-2 pt-1">
-        {tabs.map((tab) => {
-          const selected = tab.id === active.id;
-          return (
-            <button
+      <Tabs value={active.id} onValueChange={onActivate} variant="underline" className="bg-[#f3f3f3] px-2 pt-1">
+        <TabsList aria-label="Ribbon" className="border-b-0">
+          {tabs.map((tab) => (
+            <TabsTrigger
               key={tab.id}
-              role="tab"
-              type="button"
-              aria-selected={selected}
+              value={tab.id}
               onMouseDown={(event) => event.preventDefault()}
-              onClick={() => onActivate(tab.id)}
-              className={`rounded-t px-4 py-1.5 text-[13px] ${
-                selected
-                  ? `border border-b-0 border-slate-300 bg-white font-semibold ${theme.accent}`
-                  : `border border-transparent text-slate-700 hover:bg-slate-200/70 ${tab.contextual ? 'text-emerald-700' : ''}`
-              }`}
+              indicatorClassName={cn('h-0.5', theme.indicator)}
+              className={cn('min-h-0 px-4 py-2 text-[13px]', tab.contextual && 'text-emerald-700 hover:text-emerald-800', active.id === tab.id && theme.accent)}
             >
               {tab.label}
-            </button>
-          );
-        })}
-      </div>
-      <div role="tabpanel" aria-label={active.label} className="flex min-h-[5.75rem] items-stretch gap-0 overflow-x-auto px-2 py-1.5">
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+      {/* Groups wrap instead of scrolling: an overflow container would clip the select lists. */}
+      <div role="tabpanel" aria-label={active.label} className="flex min-h-[7.5rem] flex-wrap items-stretch gap-y-1 px-2 py-1.5">
         {active.content}
       </div>
     </div>
   );
 }
 
-export function RibbonGroup({ label, children, wide }: { label: string; children: ReactNode; wide?: boolean }) {
+export function RibbonGroup({ label, children }: { label: string; children: ReactNode; wide?: boolean }) {
   return (
     <div role="group" aria-label={label} className="flex shrink-0 flex-col justify-between border-r border-slate-200 px-2 last:border-r-0">
-      <div className={`flex items-start gap-1 ${wide ? 'flex-wrap' : ''}`}>{children}</div>
+      <div className="flex items-start gap-1">{children}</div>
       <p className="mt-1 text-center text-[11px] text-slate-500">{label}</p>
     </div>
   );
@@ -160,23 +158,27 @@ export function RibbonButton({
   children?: ReactNode;
 }) {
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
       aria-label={label}
       title={label}
       aria-pressed={active}
       disabled={disabled}
+      pressScale={0.92}
       // Keep the text selection: clicking a ribbon button must not steal focus from the document.
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
-      className={`flex items-center justify-center gap-1 rounded text-[13px] disabled:opacity-35 ${
-        large ? 'h-14 w-14 flex-col text-[12px]' : 'h-7 min-w-7 px-1.5'
-      } ${active ? 'bg-[#cfdcf0] text-slate-900 ring-1 ring-slate-400' : 'text-slate-800 hover:bg-slate-200/80'}`}
+      className={cn(
+        large ? 'h-14 w-14 flex-col gap-0.5 rounded-lg px-0 text-[12px]' : 'h-7 min-w-7 gap-1 rounded-md px-1.5 text-[13px]',
+        'text-slate-800 hover:bg-slate-200/80 hover:text-slate-900 disabled:opacity-35',
+        active && 'bg-primary/15 ring-1 ring-primary/40 hover:bg-primary/20',
+      )}
     >
       {icon ? <Icon name={icon} size={large ? 22 : 16} /> : null}
       {text ? <span className={large ? '' : 'font-semibold'}>{text}</span> : null}
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -194,19 +196,56 @@ export function RibbonSelect({
   width?: string;
 }) {
   return (
-    <select
-      aria-label={label}
-      title={label}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      className={`h-7 rounded border border-slate-300 bg-white px-1 text-[13px] ${width}`}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
+    // Opening the list must not take focus (and the selection) away from the document.
+    <div onMouseDown={(event) => event.preventDefault()}>
+      <Select value={value} onValueChange={onChange} className={width}>
+        <SelectTrigger aria-label={label} className="h-7 rounded-md px-2 py-0 text-[13px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent className="max-h-64 rounded-md">
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+/** Searchable list (used for the font family): type to filter, arrows and Enter to choose. */
+export function RibbonCombobox({
+  label,
+  value,
+  options,
+  onChange,
+  width = 'w-40',
+}: {
+  label: string;
+  value: string;
+  options: Array<{ value: string; label: string }>;
+  onChange: (value: string) => void;
+  width?: string;
+}) {
+  return (
+    <div className={width}>
+      <Combobox value={value} onValueChange={onChange}>
+        <ComboboxTrigger className="h-7 min-w-0 gap-1 rounded-md px-2">
+          <ComboboxInput aria-label={label} placeholder={label} className="h-7 text-[13px]" />
+        </ComboboxTrigger>
+        <ComboboxContent className="w-52 rounded-xl">
+          <ComboboxList ariaLabel={`${label} list`} className="max-h-64 p-1">
+            <ComboboxEmpty>No match.</ComboboxEmpty>
+            {options.map((option) => (
+              <ComboboxItem key={option.value} value={option.value} textValue={option.label}>
+                <span style={{ fontFamily: option.value }}>{option.label}</span>
+              </ComboboxItem>
+            ))}
+          </ComboboxList>
+        </ComboboxContent>
+      </Combobox>
+    </div>
   );
 }
 
@@ -242,13 +281,11 @@ export function StatusBar({ app, left, right }: { app: OfficeApp; left: ReactNod
 
 /** Zoom slider shown in the status bar. */
 export function ZoomControl({ value, onChange, min = 50, max = 200 }: { value: number; onChange: (value: number) => void; min?: number; max?: number }) {
-  const [text, setText] = useState(String(value));
-  useEffect(() => setText(String(value)), [value]);
   return (
     <div className="flex items-center gap-2">
-      <button type="button" aria-label="Zoom out" onClick={() => onChange(Math.max(min, value - 10))} className="grid size-5 place-items-center rounded hover:bg-white/20">
+      <Button variant="ghost" size="icon" aria-label="Zoom out" onClick={() => onChange(Math.max(min, value - 10))} className="size-5 rounded text-white hover:bg-white/20 hover:text-white">
         <Icon name="zoomOut" size={14} />
-      </button>
+      </Button>
       <input
         type="range"
         aria-label="Zoom"
@@ -259,11 +296,11 @@ export function ZoomControl({ value, onChange, min = 50, max = 200 }: { value: n
         onChange={(event) => onChange(Number(event.target.value))}
         className="h-1 w-28 accent-white"
       />
-      <button type="button" aria-label="Zoom in" onClick={() => onChange(Math.min(max, value + 10))} className="grid size-5 place-items-center rounded hover:bg-white/20">
+      <Button variant="ghost" size="icon" aria-label="Zoom in" onClick={() => onChange(Math.min(max, value + 10))} className="size-5 rounded text-white hover:bg-white/20 hover:text-white">
         <Icon name="zoomIn" size={14} />
-      </button>
+      </Button>
       <span className="w-10 text-right tabular-nums" aria-live="polite">
-        {text}%
+        {value}%
       </span>
     </div>
   );

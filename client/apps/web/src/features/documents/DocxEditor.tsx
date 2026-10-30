@@ -13,6 +13,7 @@ import {
   RibbonColor,
   RibbonGroup,
   RibbonRow,
+  RibbonCombobox,
   RibbonSelect,
   RibbonStack,
   StatusBar,
@@ -284,7 +285,7 @@ export default function DocxEditor({
         <RibbonGroup label="Font">
           <RibbonStack>
             <RibbonRow>
-              <RibbonSelect
+              <RibbonCombobox
                 label="Font family"
                 width="w-40"
                 value={s?.fontFamily ?? 'Calibri'}
