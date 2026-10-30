@@ -1,0 +1,50 @@
+{
+  "name": "@office-template/server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hono API for the office template library.",
+  "exports": {
+    "./contracts": "./src/contracts/index.ts",
+    "./app-type": "./src/app-type.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "start": "tsx --env-file-if-exists=.env src/server.ts",
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "drizzle-kit generate",
+    "seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "generate:templates": "tsx scripts/generate-templates.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.0",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.6.3",
+    "@turbodocx/html-to-docx": "^1.23.1",
+    "@xmldom/xmldom": "^0.9.12",
+    "better-sqlite3": "^13.0.3",
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.14",
+    "jszip": "^3.10.1",
+    "mammoth": "^1.13.0",
+    "pino": "^10.0.0",
+    "sanitize-html": "^2.17.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.0.0",
+    "@types/sanitize-html": "^2.16.0",
+    "docx": "^9.15.0",
+    "drizzle-kit": "^0.31.0",
+    "pino-pretty": "^13.0.0",
+    "pptxgenjs": "^4.0.1",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  }
+}
