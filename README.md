@@ -14,7 +14,7 @@ A working template gallery for Office documents. Pick a **Word (DOCX)** or **Pow
 | Frontend | TanStack Start (React 19, SSR), TanStack Router and Form, TipTap, Tailwind CSS, [beUI](https://beui.dev) components (Button, Input, Tabs, Select, Combobox) |
 | Backend | Hono on Node, zod, OpenAPI/Swagger |
 | Data | SQLite (Drizzle ORM), local file storage |
-| Tests | Vitest (82), Playwright (29) |
+| Tests | Vitest (88), Playwright (34) |
 
 ## Quick start
 

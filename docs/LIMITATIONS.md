@@ -31,7 +31,7 @@
 - SSR for library, preview and "My files"; real HTTP 404s; Open Graph tags on preview pages.
 - Dia-style layout with a command palette (beUI, Cmd/Ctrl+K) for templates and your files, plus-circles on Documents and Presentations that create blank files, and beUI Button, Input, Tabs, Select and Combobox throughout.
 - DOCX/PPTX conversions run in a worker thread so large saves never stall the API; `pnpm perf` measures frames and long tasks.
-- Tests: 82 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 29 end-to-end tests (Playwright), typecheck for both packages.
+- Tests: 88 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 34 end-to-end tests (Playwright), typecheck for both packages.
 
 ## Not completed
 
@@ -42,7 +42,7 @@
 | Template deletion and rollback | Templates can be added and updated (versioned) but not removed through the API. |
 | Real authentication | Sessions are anonymous cookies. Clearing cookies loses access to your files. The admin API uses one static token. |
 | Rate limiting, antivirus scanning, quotas | Uploads are validated and size-limited but not scanned. |
-| Autosave and collaboration | Saving is explicit. |
+| Autosave in the Word-style editor, and collaboration | The PowerPoint-style editor autosaves when you click outside the text; the Word-style editor saves only with Save or Ctrl+S. There is no real-time collaboration. |
 | Internationalisation | English only. |
 
 ## Technical limitations
