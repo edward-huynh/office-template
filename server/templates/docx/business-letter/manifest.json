@@ -1,0 +1,12 @@
+{
+  "id": "business-letter",
+  "type": "docx",
+  "name": "Business Letter",
+  "category": "Letters",
+  "description": "A formal letter with sender block, recipient, subject line and signature.",
+  "file": "template.docx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}

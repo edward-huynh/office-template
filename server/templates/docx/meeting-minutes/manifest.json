@@ -1,0 +1,12 @@
+{
+  "id": "meeting-minutes",
+  "type": "docx",
+  "name": "Meeting Minutes",
+  "category": "Meetings",
+  "description": "Agenda, attendees, decisions and an action-item table for recurring meetings.",
+  "file": "template.docx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png"
+  ]
+}

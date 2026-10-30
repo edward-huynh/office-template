@@ -1,0 +1,17 @@
+{
+  "id": "pitch-deck-modern",
+  "type": "pptx",
+  "name": "Modern Pitch Deck",
+  "category": "Business",
+  "description": "A dark, high-contrast investor pitch: problem, solution, traction and the ask.",
+  "file": "template.pptx",
+  "thumbnail": "thumbnail.png",
+  "previews": [
+    "pages/1.png",
+    "pages/2.png",
+    "pages/3.png",
+    "pages/4.png",
+    "pages/5.png",
+    "pages/6.png"
+  ]
+}
