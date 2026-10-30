@@ -409,6 +409,35 @@ test('PowerPoint-style editor: edit text in place, save, reload, download', asyn
   expect(slide1).toMatch(/algn="ctr"/);
 });
 
+test('PowerPoint-style editor: clicking outside the text saves automatically', async ({ page }) => {
+  await page.goto('/pptx');
+  await page.getByRole('link', { name: 'Preview' }).first().click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Use this template' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+
+  const status = page.getByRole('status');
+  const title = page.locator('[data-editable]', { hasText: 'Startup Name' });
+  await title.click({ clickCount: 3 });
+  await page.keyboard.type('Autosaved Title');
+
+  // Clicking inside another text box keeps editing: nothing is sent yet.
+  await page.locator('[data-editable]', { hasText: 'One sentence' }).click();
+  await expect(status).toHaveText('Unsaved changes');
+
+  // A press anywhere outside the text boxes (here the status bar) saves, with no Save or Ctrl+S.
+  await page.getByText(/Slide 1 of \d+/).click();
+  await expect(status).toHaveText('Saved');
+
+  // Typing and clicking away at once (before the text's own debounce fires) is still saved.
+  await page.locator('[data-editable]', { hasText: 'Autosaved Title' }).click({ clickCount: 3 });
+  await page.keyboard.type('Second Edit');
+  await page.getByText(/Slide 1 of \d+/).click();
+  await expect(status).toHaveText('Saved');
+
+  await page.reload();
+  await expect(page.locator('[data-editable]', { hasText: 'Second Edit' })).toBeVisible();
+});
+
 test('PowerPoint-style editor: new slide, delete slide, slide show', async ({ page }) => {
   await page.goto('/pptx/lesson-plan');
   await page.getByRole('button', { name: 'Use this template' }).click();
