@@ -485,13 +485,22 @@ test('a file can be deleted after confirming, and disappears from My files and t
 
   // Cancel keeps the file.
   await page.getByRole('button', { name: 'Delete Simple Invoice' }).click();
-  await expect(page.getByText('This cannot be undone.')).toBeVisible();
-  await page.getByRole('button', { name: 'Cancel' }).click();
+  const confirm = page.getByRole('dialog', { name: 'Delete this file?' });
+  await expect(confirm).toContainText('permanently deleted');
+  await confirm.getByRole('button', { name: 'Cancel' }).click();
+  await expect(confirm).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toBeVisible();
+
+  // Escape also cancels.
+  await page.getByRole('button', { name: 'Delete Simple Invoice' }).click();
+  await expect(confirm).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(confirm).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toBeVisible();
 
   // Confirming removes it everywhere.
   await page.getByRole('button', { name: 'Delete Simple Invoice' }).click();
-  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await confirm.getByRole('button', { name: 'Delete', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toHaveCount(0);
   await expect(page.getByText('You have not created anything yet')).toBeVisible();
   await expect(recent).toHaveCount(0);
