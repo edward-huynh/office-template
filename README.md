@@ -3,7 +3,7 @@
 A working template gallery for Office documents. Pick a **Word (DOCX)** or **PowerPoint (PPTX)** template, preview it, and create your own copy. Both types open in an editor modelled on Word and PowerPoint (ribbon, page or slide canvas, status bar) and download as standard Office files. The original templates are never modified.
 
 - **Blank files**: "Start from scratch" tiles create a blank document (an empty Word-style page) or a blank presentation (one slide with empty title and content boxes).
-- **Layout**: a Dia-style window: a tinted backdrop with the navigation rail directly on it (a search box that opens a command palette, Cmd/Ctrl+K, to find templates and your files, and two buttons that start a blank document or presentation), and the page as one rounded floating panel.
+- **Layout**: a Dia-style window: a tinted backdrop with the navigation rail directly on it (a search box that opens a command palette, Cmd/Ctrl+K, to find templates and your files, and a plus-circle on Documents and Presentations that starts a blank file), and the page as one rounded floating panel.
 - **Gallery**: a modern template gallery: sidebar navigation, a hero banner, All / Documents / Presentations tabs, category chips, rounded thumbnail cards with hover actions, a quick-preview modal, and a "continue where you left off" row of your recent files.
 - **Documents**: 6 sample templates, searchable and filterable, edited in a Word-style editor (fonts, sizes, colours, alignment, lists, tables, ruler, page count, zoom).
 - **Presentations**: 4 sample decks with slide-by-slide preview, edited in a PowerPoint-style editor (thumbnails, in-place text editing and formatting, new/delete slide, slide show).

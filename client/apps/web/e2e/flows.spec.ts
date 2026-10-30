@@ -228,7 +228,7 @@ test('Dia-style shell: the page scrolls inside its own panel, the rail stays put
   expect(await panel.evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).not.toBe('0px');
 });
 
-test('command palette finds templates and my files; the sidebar has two blank-file buttons', async ({ page }) => {
+test('command palette finds templates and my files; plus-circles in the sidebar create blank files', async ({ page }) => {
   await page.goto('/');
   const search = page.getByRole('button', { name: /Search or jump to/ });
 
@@ -239,7 +239,7 @@ test('command palette finds templates and my files; the sidebar has two blank-fi
   await page.getByRole('option', { name: /Modern Pitch Deck/ }).click();
   await expect(page).toHaveURL(/\/pptx\/pitch-deck-modern$/);
 
-  // Quick actions are two plain buttons in the sidebar.
+  // The plus-circle next to Documents / Presentations in the sidebar creates a blank file.
   await page.goto('/docx');
   await page.getByRole('button', { name: 'New blank document' }).click();
   await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);

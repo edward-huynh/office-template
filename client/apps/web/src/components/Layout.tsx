@@ -5,7 +5,7 @@ import { LazyMotion } from 'motion/react';
 import type { ReactNode } from 'react';
 import type { OfficeDocument } from '@office-template/server/contracts';
 import { Icon, type IconName } from './icons';
-import { QuickActions } from './QuickActions';
+import { NavCreateItem } from './NavCreateItem';
 import { SidebarSearch } from './SidebarSearch';
 import { TypeMark } from './ui';
 
@@ -73,14 +73,27 @@ export function Sidebar({ recents }: { recents: OfficeDocument[] }) {
     <>
       <aside className="hidden w-64 shrink-0 flex-col gap-5 p-3 lg:flex">
         <Brand />
-        <div className="space-y-2">
-          <SidebarSearch />
-          <QuickActions />
-        </div>
+        <SidebarSearch />
         <nav aria-label="Main" className="flex flex-col gap-1">
           <NavItem to="/" exact icon="grid" label="All templates" />
-          <NavItem to="/docx" icon="doc" label="Documents" />
-          <NavItem to="/pptx" icon="slides" label="Presentations" />
+          <NavCreateItem
+            to="/docx"
+            icon="doc"
+            label="Documents"
+            blankTemplateId="blank-document"
+            createLabel="New blank document"
+            className={`${itemClass} ${idleClass}`}
+            activeClassName={`${itemClass} ${activeClass}`}
+          />
+          <NavCreateItem
+            to="/pptx"
+            icon="slides"
+            label="Presentations"
+            blankTemplateId="blank-presentation"
+            createLabel="New blank presentation"
+            className={`${itemClass} ${idleClass}`}
+            activeClassName={`${itemClass} ${activeClass}`}
+          />
           <p className="mt-5 mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-600">Yours</p>
           <NavItem to="/documents" icon="folder" label="My files" />
         </nav>
