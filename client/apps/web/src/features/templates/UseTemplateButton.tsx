@@ -19,7 +19,7 @@ export function UseTemplateButton({
         {pending ? 'Creating…' : label}
       </Button>
       {error ? (
-        <p role="alert" className="mt-2 rounded-lg bg-red-50 px-2 py-1 text-xs text-red-700">
+        <p role="alert" className="mt-2 rounded-xl bg-red-50 px-2 py-1 text-xs text-red-700">
           {error}
         </p>
       ) : null}

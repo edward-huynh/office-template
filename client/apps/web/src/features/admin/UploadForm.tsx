@@ -25,7 +25,7 @@ function FieldShell({ label, error, children }: { label: string; error?: string;
   );
 }
 
-const nativeClass = 'mt-1.5 w-full rounded-2xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:border-foreground/40 focus:ring-2 focus:ring-ring/40';
+const nativeClass = 'mt-1.5 w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm outline-none focus:border-foreground/40 focus:ring-2 focus:ring-ring/40';
 
 /** Adds a template through the admin API; the new template shows up in the library immediately. */
 export function UploadForm() {
@@ -63,7 +63,7 @@ export function UploadForm() {
         event.stopPropagation();
         void form.handleSubmit();
       }}
-      className="max-w-xl space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 "
     >
       <form.Field name="token" validators={{ onBlur: required, onSubmit: required }}>
         {(field) => (
@@ -134,12 +134,12 @@ export function UploadForm() {
       </form.Subscribe>
 
       {result.error ? (
-        <p role="alert" className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-800">
+        <p role="alert" className="rounded-xl bg-red-50 px-4 py-2 text-sm text-red-800">
           {result.error}
         </p>
       ) : null}
       {result.template && link ? (
-        <p role="status" className="rounded-lg bg-green-50 px-4 py-2 text-sm text-green-900">
+        <p role="status" className="rounded-xl bg-green-50 px-4 py-2 text-sm text-green-900">
           Saved “{result.template.name}” (version {result.template.version}).{' '}
           <Link {...link} className="font-medium underline">
             View it in the library

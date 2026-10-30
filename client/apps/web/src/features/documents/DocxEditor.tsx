@@ -352,7 +352,7 @@ export default function DocxEditor({
                   aria-pressed={active}
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={apply}
-                  className={`flex h-14 w-20 flex-col justify-center rounded border px-2 text-left ${active ? 'border-[#2b579a] bg-[#cfdcf0]' : 'border-slate-300 bg-white hover:bg-slate-100'}`}
+                  className={`flex h-14 w-20 flex-col justify-center rounded-xl border px-2 text-left ${active ? 'border-[#2b579a] bg-[#cfdcf0]' : 'border-slate-300 bg-white hover:bg-slate-100'}`}
                 >
                   <span className={tile.className}>AaBbCc</span>
                   <span className="text-[10px] text-slate-500">{tile.label}</span>
@@ -455,7 +455,7 @@ export default function DocxEditor({
         status={status}
         onSave={() => void save()}
         actions={
-          <button type="button" onClick={() => void download()} disabled={status === 'saving'} className="flex items-center gap-1.5 rounded bg-white px-3 py-1.5 text-sm font-semibold text-[#2b579a] hover:bg-slate-100 disabled:opacity-60">
+          <button type="button" onClick={() => void download()} disabled={status === 'saving'} className="flex items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-sm font-semibold text-[#2b579a] hover:bg-slate-100 disabled:opacity-60">
             <Icon name="download" /> Download DOCX
           </button>
         }

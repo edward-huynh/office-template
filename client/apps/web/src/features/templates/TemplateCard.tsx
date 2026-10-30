@@ -11,14 +11,14 @@ import { UseTemplateButton } from './UseTemplateButton';
 const FRAME = {
   docx: {
     backdrop: 'from-sky-50 to-indigo-100',
-    image: 'w-[74%] translate-y-4 rounded-t-sm shadow-[0_8px_24px_rgba(15,23,42,0.22)] group-hover:translate-y-2',
+    image: 'w-[74%] translate-y-4 rounded-t-sm ring-1 ring-black/10 group-hover:translate-y-2',
     layout: 'items-end',
     width: 480,
     height: 621,
   },
   pptx: {
     backdrop: 'from-orange-50 to-rose-100',
-    image: 'w-[88%] rounded-md shadow-[0_8px_24px_rgba(15,23,42,0.25)] group-hover:scale-[1.03]',
+    image: 'w-[88%] rounded-xl ring-1 ring-black/10 group-hover:scale-[1.03]',
     layout: 'items-center',
     width: 480,
     height: 270,
@@ -38,7 +38,7 @@ export function TemplateCard({
   const open = () => onQuickPreview(template);
   return (
     <article className="group flex w-full flex-col">
-      <div className={`relative aspect-[5/4] overflow-hidden rounded-2xl bg-gradient-to-br ${frame.backdrop} ring-1 ring-slate-200/80 transition duration-300 group-hover:-translate-y-0.5 group-hover:shadow-xl`}>
+      <div className={`relative aspect-[5/4] overflow-hidden rounded-xl bg-gradient-to-br ${frame.backdrop} ring-1 ring-slate-200/80 transition duration-300 group-hover:-translate-y-0.5 `}>
         <PreviewLink type={template.type} id={template.id} onOpen={open} hidden className={`flex h-full w-full justify-center ${frame.layout}`}>
           <img
             src={template.thumbnailUrl}

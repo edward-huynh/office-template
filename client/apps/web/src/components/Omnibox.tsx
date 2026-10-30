@@ -86,10 +86,10 @@ export default function Omnibox({ autoFocus = false }: { autoFocus?: boolean }) 
         onOpenChange={setOpen}
         filter={() => true}
       >
-        <ComboboxTrigger className="h-10 rounded-xl border-transparent bg-white/70 shadow-sm">
+        <ComboboxTrigger className="h-10 rounded-xl border-transparent bg-white/70 ">
           <ComboboxInput aria-label="Search templates" placeholder="Search or jump to…" autoFocus={autoFocus} />
         </ComboboxTrigger>
-        <ComboboxContent className="w-72 rounded-2xl">
+        <ComboboxContent className="w-72 rounded-xl">
           <ComboboxList ariaLabel="Templates and actions" className="p-2">
             {text ? (
               <>
@@ -123,7 +123,7 @@ export default function Omnibox({ autoFocus = false }: { autoFocus?: boolean }) 
         </ComboboxContent>
       </Combobox>
       {error ? (
-        <p role="alert" className="mt-1.5 rounded-lg bg-red-50 px-2 py-1 text-xs text-red-700">
+        <p role="alert" className="mt-1.5 rounded-xl bg-red-50 px-2 py-1 text-xs text-red-700">
           {error}
         </p>
       ) : null}

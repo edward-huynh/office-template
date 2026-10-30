@@ -422,10 +422,10 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
         onSave={() => void save()}
         actions={
           <>
-            <button type="button" onClick={() => setPresent(active)} className="flex items-center gap-1.5 rounded px-3 py-1.5 text-sm hover:bg-white/15">
+            <button type="button" onClick={() => setPresent(active)} className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm hover:bg-white/15">
               <Icon name="play" /> Present
             </button>
-            <button type="button" onClick={() => void download()} disabled={status === 'saving'} className="flex items-center gap-1.5 rounded bg-white px-3 py-1.5 text-sm font-semibold text-[#b7472a] hover:bg-slate-100 disabled:opacity-60">
+            <button type="button" onClick={() => void download()} disabled={status === 'saving'} className="flex items-center gap-1.5 rounded-xl bg-white px-3 py-1.5 text-sm font-semibold text-[#b7472a] hover:bg-slate-100 disabled:opacity-60">
               <Icon name="download" /> Download PPTX
             </button>
           </>

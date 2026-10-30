@@ -8,12 +8,12 @@ import { LazyOmnibox } from './LazyOmnibox';
 
 const itemClass = 'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors';
 const idleClass = 'text-slate-600 hover:bg-white/60 hover:text-slate-900';
-const activeClass = 'bg-white text-primary shadow-sm ring-1 ring-black/5';
+const activeClass = 'bg-white text-primary ring-1 ring-black/5';
 
 function Brand() {
   return (
     <Link to="/" className="flex items-center gap-2.5 px-2 text-[17px] font-bold tracking-tight text-slate-900">
-      <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm text-white shadow-sm">
+      <span aria-hidden className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-sm text-white ">
         T
       </span>
       Template Library
@@ -38,7 +38,7 @@ function NavItem({ to, icon, label, exact }: { to: '/' | '/docx' | '/pptx' | '/d
 export function Sidebar() {
   return (
     <>
-      <aside className="hidden w-60 shrink-0 flex-col gap-5 px-2 py-3 lg:flex">
+      <aside className="hidden w-60 shrink-0 flex-col gap-5 p-3 lg:flex">
         <Brand />
         <LazyOmnibox />
         <nav aria-label="Main" className="flex flex-col gap-1">
@@ -69,7 +69,7 @@ export function Sidebar() {
 function FooterContent() {
   return (
     <footer className="border-t border-slate-100">
-      <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500 sm:px-8">
+      <div className="px-4 py-5 text-sm text-slate-500 sm:px-6">
         Templates are copied when you use them, so the originals are never changed. Your files belong to this browser
         session.
       </div>
@@ -87,7 +87,7 @@ export function Footer() {
 }
 
 /**
- * Dia-style window: a tinted backdrop, the rail on it, and the page as one rounded floating panel
+ * Dia-style window: a tinted backdrop, the rail on it, and the page as one rounded-xl floating panel
  * that scrolls on its own. The panel (not the window) is the scroll container.
  */
 const loadMotionFeatures = () => import('#/lib/motion-features').then((module) => module.default);
@@ -100,9 +100,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div
         id="main-panel"
         data-scroll-restoration-id="main"
-        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white lg:rounded-2xl lg:shadow-[0_0_0_1px_rgba(15,23,42,0.06),0_10px_40px_-8px_rgba(15,23,42,0.18)]"
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-white lg:rounded-xl lg:border lg:border-slate-200/70 "
       >
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-8 sm:py-8">{children}</main>
+        <main className="w-full flex-1 p-4 sm:p-6">{children}</main>
         <Footer />
       </div>
     </div>

@@ -17,7 +17,7 @@ const BASE_VARIANT: Record<ButtonVariant, BeVariant> = {
 };
 
 const EXTRA: Partial<Record<ButtonVariant, string>> = {
-  light: 'border-transparent bg-white text-slate-900 shadow-sm hover:bg-slate-100',
+  light: 'border-transparent bg-white text-slate-900 hover:bg-slate-100',
   glass: 'bg-white/20 text-white ring-1 ring-white/40 backdrop-blur hover:bg-white/30 hover:text-white',
 };
 
@@ -40,7 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, Omit<BeButtonProps, 'variant
 
 export function Badge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-block rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{children}</span>
+    <span className="inline-block rounded-xl bg-accent px-2.5 py-0.5 text-xs font-medium text-primary">{children}</span>
   );
 }
 
@@ -49,7 +49,7 @@ export function TypeMark({ type }: { type: 'docx' | 'pptx' }) {
   return (
     <span
       title={type === 'docx' ? 'Word document' : 'PowerPoint presentation'}
-      className={`grid size-6 place-items-center rounded-md text-[11px] font-black text-white shadow-sm ${
+      className={`grid size-6 place-items-center rounded-md text-[11px] font-black text-white ${
         type === 'docx' ? 'bg-[#2b579a]' : 'bg-[#c43e1c]'
       }`}
     >

@@ -6,7 +6,7 @@ const Omnibox = lazy(() => import('./Omnibox'));
 /** Looks like the omnibox before it loads, so the layout does not move when the real one arrives. */
 function Shell({ onActivate }: { onActivate?: () => void }) {
   return (
-    <div className="flex h-10 items-center gap-2 rounded-xl border border-transparent bg-white/70 px-3 text-sm shadow-sm">
+    <div className="flex h-10 items-center gap-2 rounded-xl border border-transparent bg-white/70 px-3 text-sm ">
       <Search aria-hidden className="size-4 shrink-0 text-muted-foreground" />
       <input
         readOnly

@@ -17,13 +17,13 @@ export function RecentFiles({ items }: { items: OfficeDocument[] }) {
           All files
         </Link>
       </div>
-      <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {items.map((doc) => (
           <li key={doc.id}>
             <Link
               to="/documents/$documentId"
               params={{ documentId: doc.id }}
-              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 transition hover:border-slate-300 hover:shadow-md"
+              className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 "
             >
               <img
                 src={doc.thumbnailUrl}
@@ -31,7 +31,7 @@ export function RecentFiles({ items }: { items: OfficeDocument[] }) {
                 width={56}
                 height={doc.type === 'pptx' ? 32 : 72}
                 loading="lazy"
-                className="h-14 w-14 shrink-0 rounded-lg bg-slate-100 object-cover object-top ring-1 ring-slate-200"
+                className="h-14 w-14 shrink-0 rounded-xl bg-slate-100 object-cover object-top ring-1 ring-slate-200"
               />
               <span className="min-w-0">
                 <span className="flex items-center gap-1.5">

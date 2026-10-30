@@ -53,7 +53,7 @@ export function TitleBar({
   const statusText = { saved: 'Saved', dirty: 'Unsaved changes', saving: 'Saving…', error: 'Save failed' }[status];
   return (
     <header className={`flex items-center gap-3 px-3 py-1.5 text-white ${theme.bar}`}>
-      <Link to="/documents" aria-label="Back to my files" title="Back to my files" className="grid size-8 place-items-center rounded hover:bg-white/15">
+      <Link to="/documents" aria-label="Back to my files" title="Back to my files" className="grid size-8 place-items-center rounded-xl hover:bg-white/15">
         <Icon name="back" />
       </Link>
       <span aria-hidden className="grid size-7 place-items-center rounded-sm bg-white text-sm font-black" style={{ color: app === 'word' ? '#2b579a' : '#b7472a' }}>
@@ -67,7 +67,7 @@ export function TitleBar({
         onChange={onTitleChange}
         className="min-w-0 max-w-md flex-1"
         classNames={{
-          field: 'h-8 rounded-md border-transparent bg-transparent hover:bg-white/10 focus-within:bg-white/20 focus-within:ring-white/40',
+          field: 'h-8 rounded-xl border-transparent bg-transparent hover:bg-white/10 focus-within:bg-white/20 focus-within:ring-white/40',
           input: 'pl-2 text-sm font-semibold text-white caret-white',
         }}
       />
@@ -170,7 +170,7 @@ export function RibbonButton({
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
       className={cn(
-        large ? 'h-14 w-14 flex-col gap-0.5 rounded-lg px-0 text-[12px]' : 'h-7 min-w-7 gap-1 rounded-md px-1.5 text-[13px]',
+        large ? 'h-14 w-14 flex-col gap-0.5 rounded-xl px-0 text-[12px]' : 'h-7 min-w-7 gap-1 rounded-xl px-1.5 text-[13px]',
         'text-slate-800 hover:bg-slate-200/80 hover:text-slate-900 disabled:opacity-35',
         active && 'bg-primary/15 ring-1 ring-primary/40 hover:bg-primary/20',
       )}
@@ -199,10 +199,10 @@ export function RibbonSelect({
     // Opening the list must not take focus (and the selection) away from the document.
     <div onMouseDown={(event) => event.preventDefault()}>
       <Select value={value} onValueChange={onChange} className={width}>
-        <SelectTrigger aria-label={label} className="h-7 rounded-md px-2 py-0 text-[13px]">
+        <SelectTrigger aria-label={label} className="h-7 rounded-xl px-2 py-0 text-[13px]">
           <SelectValue />
         </SelectTrigger>
-        <SelectContent className="max-h-64 rounded-md">
+        <SelectContent className="max-h-64 rounded-xl">
           {options.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
@@ -231,7 +231,7 @@ export function RibbonCombobox({
   return (
     <div className={width}>
       <Combobox value={value} onValueChange={onChange}>
-        <ComboboxTrigger className="h-7 min-w-0 gap-1 rounded-md px-2">
+        <ComboboxTrigger className="h-7 min-w-0 gap-1 rounded-xl px-2">
           <ComboboxInput aria-label={label} placeholder={label} className="h-7 text-[13px]" />
         </ComboboxTrigger>
         <ComboboxContent className="w-52 rounded-xl">
@@ -254,7 +254,7 @@ export function RibbonColor({ label, value, onChange, glyph, glyphClass }: { lab
   return (
     <label
       title={label}
-      className="relative flex h-7 w-8 cursor-pointer flex-col items-center justify-center rounded hover:bg-slate-200/80"
+      className="relative flex h-7 w-8 cursor-pointer flex-col items-center justify-center rounded-xl hover:bg-slate-200/80"
       onMouseDown={(event) => event.preventDefault()}
     >
       <span className={`text-[13px] font-bold leading-none ${glyphClass ?? ''}`}>{glyph}</span>

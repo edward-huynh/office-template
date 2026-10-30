@@ -181,9 +181,9 @@ export function Tabs({
 }
 
 const listClasses: Record<Variant, string> = {
-  pill: "inline-flex items-center gap-1 rounded-full bg-card p-1",
+  pill: "inline-flex items-center gap-1 rounded-xl bg-card p-1",
   underline: "inline-flex items-center gap-1 border-b border-border",
-  segment: "inline-flex items-center gap-0 rounded-lg bg-card p-0.5",
+  segment: "inline-flex items-center gap-0 rounded-xl bg-card p-0.5",
 };
 
 export function TabsList({
@@ -404,7 +404,7 @@ export function TabsList({
     if (viewport) viewport.scrollBy({ left: direction * viewport.clientWidth * 0.8, behavior: reduce ? "instant" : "smooth" });
   };
   const controlClass = "absolute inset-y-0 z-20 inline-flex w-9 items-center justify-center text-foreground transition-opacity hover:opacity-70 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-0";
-  const surfaceClass = variant === "pill" ? "rounded-full bg-card" : variant === "segment" ? "rounded-lg bg-card" : "";
+  const surfaceClass = variant === "pill" ? "rounded-xl bg-card" : variant === "segment" ? "rounded-xl bg-card" : "";
 
   return (
     <div ref={rootRef} className={cn("relative isolate flex w-full max-w-full min-w-0 items-center", edges.overflow && surfaceClass, wrapperClassName)}>
@@ -565,7 +565,7 @@ export function TabsTrigger({
     );
   }
 
-  const radius = variant === "pill" ? "rounded-full" : "rounded-md";
+  const radius = variant === "pill" ? "rounded-lg" : "rounded-[10px]";
   // Tracked pills are placed in the list, so this wrapper must not be their
   // containing block. Server HTML can't measure, so until the first
   // measurement the pill fills the selected tab with CSS, like the others.
@@ -580,7 +580,7 @@ export function TabsTrigger({
         <m.span
           key="tracked"
           data-tabs-indicator=""
-          style={{ ...track, borderRadius: variant === "pill" ? 9999 : 8 }}
+          style={{ ...track, borderRadius: variant === "pill" ? 8 : 10 }}
           className={cn("absolute top-0 left-0 bg-primary", radius, indicatorClassName)}
         />
       ) : active ? (
@@ -589,7 +589,7 @@ export function TabsTrigger({
           data-tabs-indicator=""
           layoutId={layoutId}
           layout
-          style={{ borderRadius: variant === "pill" ? 9999 : 8 }}
+          style={{ borderRadius: variant === "pill" ? 8 : 10 }}
           className={cn(
             "absolute inset-0 bg-primary",
             radius,
@@ -663,7 +663,7 @@ export function TabsContent({ value, children, className }: { value: string; chi
       initial={{ opacity: 0, y: reduce ? 0 : 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18, ease: EASE_OUT }}
-      className={cn("mt-4 outline-none focus-visible:ring-2 focus-visible:ring-ring/40 rounded-md", className)}
+      className={cn("mt-4 outline-none focus-visible:ring-2 focus-visible:ring-ring/40 rounded-xl", className)}
     >
       {children}
     </m.div>
