@@ -218,7 +218,7 @@ TanStack Start (React 19, SSR, no React Server Components) with TanStack Router,
 | Route | Rendering | Notes |
 | --- | --- | --- |
 | `/` | SSR, per visitor | The home gallery: templates of every type, plus the visitor's four most recent files (cookie forwarded during SSR; a failure there never breaks the page) |
-| `/docx`, `/pptx` | SSR | The same gallery filtered by type. Loader driven by validated search params (`q`, `category`, `page`). Works without JavaScript through a plain GET form and real links. |
+| `/docx`, `/pptx` | SSR | The same gallery filtered by type. Loader driven by validated search params (`q`, `category`, `page`). Works without JavaScript through real links (including `?q=` URLs). |
 | `/docx/$templateId`, `/pptx/$templateId` | SSR | Preview with page or slide images. `head()` sets `og:title`, `og:description`, `og:image`. Unknown id, or an id of the other type, returns HTTP 404. |
 | `/documents` | SSR, per visitor | Session cookie forwarded to the API during SSR |
 | `/documents/$documentId` | `ssr: 'data-only'` | The loader runs on the server (the document, plus the editor HTML for DOCX or the slide model for PPTX); the editor renders on the client as a full-window Office-style surface. Each editor is a separately loaded chunk. |
@@ -234,13 +234,13 @@ Behaviours worth knowing: ribbon controls keep the text selection (a `mousedown`
 
 ### 7.1.1 Gallery design
 
-The library follows a "modern gallery" style (hero search, type tabs, category chips, soft-shadow cards) inside an app shell with a left sidebar (a compact top bar with scrollable pills on small screens). The editors keep their Office look.
+The library follows a "modern gallery" style (hero banner, type tabs, category chips, soft-shadow cards) inside an app shell with a left sidebar (a compact top bar with scrollable pills on small screens). The editors keep their Office look.
 
 - **Sidebar "Recent"** lists the visitor's 20 latest files. The root route's loader fetches them (`GET /api/documents?limit=20`, with the visitor's cookie, so it is server-rendered) and a failure just leaves the list empty. Renaming from My files calls `router.invalidate()`, which refreshes that list too.
 - **Buttons** show a pointer cursor and animate only on press (a small scale); there is no hover animation, only the colour change.
 - **Cards** show DOCX pages like a sheet of paper peeking out of a tinted frame and PPTX slides whole. Actions (Use template, Preview) appear on hover or focus on large screens and are always visible on small ones.
 - **Quick preview** is a native `<dialog>` (focus trap, Escape, inert background for free). A plain click on "Preview" opens it; a modified click (Ctrl/Cmd/Shift) or a request without JavaScript follows the real link to the template's own page, so every template keeps a shareable, server-rendered URL. For decks the arrow keys and a filmstrip move between slides; "Open full page" links to the dedicated route.
-- **Search** is a plain GET form that works without JavaScript. Once hydrated it updates the URL as you type; the input is uncontrolled so text typed before hydration finishes is kept and submitted.
+- **Search** lives in the sidebar's command palette (needs JavaScript). The gallery has no search box of its own, but its `q` search param still works as a plain URL (`/docx?q=invoice`) and is filtered on the server, so a search link works without JavaScript.
 - The decorative duplicate link on each thumbnail is `aria-hidden` and not focusable, so keyboard and screen-reader users see one "Preview" link per card.
 
 ### 7.2 Reducing JavaScript
@@ -301,7 +301,7 @@ Every route has pending, error and not-found handling (defaults in `router.tsx`;
 | Level | Scope |
 | --- | --- |
 | Unit and integration (Vitest, in-process Hono, in-memory SQLite) | Hidden blank starters (not listed, usable, typed content saved), catalog queries, 404s, validation envelope, image caching (ETag), copy-on-use, template store snapshot unchanged, ownership isolation, DOCX round trip including fonts/colours/alignment in the saved XML, CSS and HTML sanitizing, PPTX slide model for every sample deck, text edits that touch only listed shapes, duplicate/delete slide, XML-illegal characters, admin auth, upload validation (type, size), re-upload versioning, path safety, env validation, manifest loader, preview generation (placeholder, failing converter, and real LibreOffice when installed, including opening an edited deck) |
-| End-to-end (Playwright against a production build with its own API and database) | Create-blank tiles and blank editors, JavaScript-disabled SSR checks (content, GET search form, category links, `og:image`), HTTP 404s, images load (including previews opened by client-side navigation), browse/search/filter, Word editor (ribbon, ruler, page, formatting that survives reload and download, table tab), PowerPoint editor (edit, format, save, reload, download, new/delete slide, slide show), My files, cross-session isolation, admin upload and wrong token |
+| End-to-end (Playwright against a production build with its own API and database) | Create-blank tiles and blank editors, JavaScript-disabled SSR checks (content, `?q=` search URL, category links, `og:image`), HTTP 404s, images load (including previews opened by client-side navigation), browse/search/filter, Word editor (ribbon, ruler, page, formatting that survives reload and download, table tab), PowerPoint editor (edit, format, save, reload, download, new/delete slide, slide show), My files, cross-session isolation, admin upload and wrong token |
 
 ## 10. Extension points
 

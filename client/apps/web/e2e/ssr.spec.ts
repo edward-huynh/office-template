@@ -21,11 +21,8 @@ test.describe('server-side rendering (JavaScript disabled)', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
-  test('the search form works with a plain GET request', async ({ page }) => {
-    await page.goto('/docx');
-    await page.getByRole('searchbox', { name: 'Search templates' }).fill('invoice');
-    await page.getByRole('button', { name: 'Search', exact: true }).click();
-    await expect(page).toHaveURL(/q=invoice/);
+  test('a search URL is filtered on the server', async ({ page }) => {
+    await page.goto('/docx?q=invoice');
     await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Business Letter' })).toHaveCount(0);
   });

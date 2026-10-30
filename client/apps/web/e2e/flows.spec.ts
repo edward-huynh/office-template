@@ -23,16 +23,15 @@ async function readDownload(download: import('@playwright/test').Download) {
   return fs.readFile(file);
 }
 
-test('browse, search and filter the document library', async ({ page }) => {
+test('browse and filter the document library (search links and the Clear filters link)', async ({ page }) => {
   await page.goto('/docx');
   await expect(page.getByRole('heading', { name: 'Document templates' })).toBeVisible();
 
-  await page.getByRole('searchbox', { name: 'Search templates' }).fill('minutes');
-  await expect(page).toHaveURL(/q=minutes/);
+  await page.goto('/docx?q=minutes');
   await expect(page.getByRole('heading', { name: 'Meeting Minutes' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Business Letter' })).toHaveCount(0);
 
-  await page.getByRole('searchbox', { name: 'Search templates' }).fill('no-such-template-xyz');
+  await page.goto('/docx?q=no-such-template-xyz');
   await expect(page.getByText('No templates match your search')).toBeVisible();
   await page.getByRole('link', { name: 'Clear filters' }).click();
   await expect(page.getByRole('heading', { name: 'Business Letter' })).toBeVisible();

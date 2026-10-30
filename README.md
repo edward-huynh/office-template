@@ -4,7 +4,7 @@ A working template gallery for Office documents. Pick a **Word (DOCX)** or **Pow
 
 - **Blank files**: "Start from scratch" tiles create a blank document (an empty Word-style page) or a blank presentation (one slide with empty title and content boxes).
 - **Layout**: a Dia-style window: a tinted backdrop with the navigation rail directly on it (a search box that opens a command palette, Cmd/Ctrl+K, to find templates and your files, and two buttons that start a blank document or presentation), and the page as one rounded floating panel.
-- **Gallery**: a modern template gallery: sidebar navigation, a hero with a large search, All / Documents / Presentations tabs, category chips, rounded thumbnail cards with hover actions, a quick-preview modal, and a "continue where you left off" row of your recent files.
+- **Gallery**: a modern template gallery: sidebar navigation, a hero banner, All / Documents / Presentations tabs, category chips, rounded thumbnail cards with hover actions, a quick-preview modal, and a "continue where you left off" row of your recent files.
 - **Documents**: 6 sample templates, searchable and filterable, edited in a Word-style editor (fonts, sizes, colours, alignment, lists, tables, ruler, page count, zoom).
 - **Presentations**: 4 sample decks with slide-by-slide preview, edited in a PowerPoint-style editor (thumbnails, in-place text editing and formatting, new/delete slide, slide show).
 - **One platform** behind both: a `type` field, a shared API, and a registry that makes new Office types an additive change.
@@ -51,7 +51,7 @@ Open <http://localhost:3000>. The API image includes LibreOffice (used to render
 4. **My files** lists everything created in this browser session; the pencil next to a name renames it (Enter saves, Escape cancels). The sidebar's **Recent** list shows your 20 latest files.
 5. Prove the original is untouched: use the same template again; the new copy starts without your edits.
 6. Add a template: <http://localhost:3000/admin/templates> (token `dev-admin-token` in development).
-7. Turn JavaScript off: the library, search (a plain GET form), filters and preview pages still work, because they are server-rendered.
+7. Turn JavaScript off: the library, filters, `?q=` search URLs and preview pages still work, because they are server-rendered.
 
 ## Commands
 
