@@ -5,6 +5,19 @@ import JSZip from 'jszip';
 
 const SERVER_TEMPLATES = path.resolve(import.meta.dirname, '../../../../server/templates');
 
+/** beUI controls are not native <select>s: open them and click an option. */
+async function pickFont(page: import('@playwright/test').Page, name: string) {
+  const box = page.getByRole('combobox', { name: 'Font family' });
+  await box.click();
+  await box.fill(name);
+  await page.getByRole('option', { name, exact: true }).click();
+}
+
+async function pickSize(page: import('@playwright/test').Page, size: number) {
+  await page.getByRole('button', { name: 'Font size', exact: true }).click();
+  await page.getByRole('option', { name: String(size), exact: true }).click();
+}
+
 async function readDownload(download: import('@playwright/test').Download) {
   const file = await download.path();
   return fs.readFile(file);
@@ -95,7 +108,7 @@ test('the home gallery mixes both types; tabs and the sidebar navigate', async (
   await expect(page.getByRole('heading', { name: 'Modern Pitch Deck' })).toBeVisible();
   await expect(page.getByText('10 templates', { exact: false })).toBeVisible();
 
-  await page.getByRole('navigation', { name: 'Template type' }).getByRole('link', { name: 'Presentations' }).click();
+  await page.getByRole('tablist', { name: 'Template type' }).getByRole('tab', { name: 'Presentations' }).click();
   await expect(page).toHaveURL(/\/pptx$/);
   await expect(page.getByRole('heading', { name: 'Business Letter' })).toHaveCount(0);
 
@@ -200,6 +213,47 @@ test('Create blank presentation: empty slide with hints, type, save, reload', as
   expect(Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))).toHaveLength(2);
 });
 
+test('Dia-style shell: the page scrolls inside its own panel, the rail stays put', async ({ page }) => {
+  await page.goto('/');
+  const panel = page.locator('#main-panel');
+  await expect(panel).toBeVisible();
+  const rail = page.getByRole('navigation', { name: 'Main' }).first();
+  const railBefore = await rail.boundingBox();
+
+  await page.mouse.move(700, 500);
+  await page.mouse.wheel(0, 900);
+  await expect.poll(() => panel.evaluate((el) => el.scrollTop)).toBeGreaterThan(300);
+  expect(await page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)).toBe(0); // the window itself never scrolls
+  expect((await rail.boundingBox())?.y).toBe(railBefore?.y); // the rail did not move
+  // The panel is a floating rounded card on the tinted backdrop.
+  expect(await panel.evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).not.toBe('0px');
+});
+
+test('omnibox: jump to a template by typing, or use a quick action', async ({ page }) => {
+  await page.goto('/');
+  // Loaded lazily (on idle or when reached for): the real combobox replaces the look-alike.
+  await page.getByRole('textbox', { name: 'Search templates' }).first().hover().catch(() => undefined);
+  const omnibox = page.getByRole('combobox', { name: 'Search templates' });
+  await expect(omnibox).toBeVisible();
+  await omnibox.click();
+  await expect(page.getByRole('option', { name: 'New blank document' })).toBeVisible(); // quick actions with an empty box
+  await omnibox.fill('pitch');
+  await page.getByRole('option', { name: /Modern Pitch Deck/ }).click();
+  await expect(page).toHaveURL(/\/pptx\/pitch-deck-modern$/);
+
+  await page.goto('/docx');
+  const again = page.getByRole('combobox', { name: 'Search templates' });
+  await again.click();
+  await page.getByRole('option', { name: 'New blank document' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole('textbox', { name: 'Document content' })).toBeVisible();
+
+  await page.goto('/');
+  const none = page.getByRole('combobox', { name: 'Search templates' });
+  await none.fill('zzzz-nothing');
+  await expect(page.getByText(/No templates match/)).toBeVisible();
+});
+
 test('use a DOCX template, edit it, save and download', async ({ page }) => {
   await page.goto('/docx');
   await page.getByRole('link', { name: 'Preview' }).first().click();
@@ -247,8 +301,8 @@ test('Word-style editor: formatting survives saving, reloading and downloading',
 
   const editor = page.getByRole('textbox', { name: 'Document content' });
   await editor.getByText('Subject:').click({ clickCount: 3 });
-  await page.getByLabel('Font family').selectOption('Georgia');
-  await page.getByLabel('Font size', { exact: true }).selectOption('18');
+  await pickFont(page, 'Georgia');
+  await pickSize(page, 18);
   await page.getByRole('button', { name: 'Center' }).click();
   await page.getByRole('button', { name: 'Bold' }).click();
   await page.keyboard.press('ControlOrMeta+S');
@@ -307,7 +361,7 @@ test('PowerPoint-style editor: edit text in place, save, reload, download', asyn
   const subtitle = page.locator('[data-editable]', { hasText: 'One sentence' });
   await subtitle.click({ clickCount: 3 });
   await page.getByRole('button', { name: 'Italic' }).click();
-  await page.getByLabel('Font size', { exact: true }).selectOption('28');
+  await pickSize(page, 28);
 
   await page.keyboard.press('ControlOrMeta+S');
   await expect(page.getByRole('status')).toHaveText('Saved');
