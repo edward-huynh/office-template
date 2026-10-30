@@ -93,7 +93,7 @@ export function DocumentActions({ document }: { document: OfficeDocument }) {
 
   return (
     <div className="mt-auto flex gap-2 pt-3">
-      <Link to="/documents/$documentId" params={{ documentId: document.id }} className={buttonClass()}>
+      <Link to="/documents/$documentId" params={{ documentId: document.id }} preload={false} className={buttonClass()}>
         Open
       </Link>
       <a href={document.downloadUrl} download className={buttonClass('secondary')}>

@@ -438,6 +438,47 @@ test('PowerPoint-style editor: clicking outside the text saves automatically', a
   await expect(page.locator('[data-editable]', { hasText: 'Second Edit' })).toBeVisible();
 });
 
+test('a document is never served from a cache: reopening it shows what was last saved', async ({ page }) => {
+  await page.goto('/pptx');
+  await page.getByRole('link', { name: 'Preview' }).first().click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Use this template' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+  const documentUrl = page.url();
+
+  // Open it once (this is what a cache would remember), edit, autosave by clicking away.
+  await page.locator('[data-editable]', { hasText: 'Startup Name' }).click({ clickCount: 3 });
+  await page.keyboard.type('Fresh Title');
+  await page.getByText(/Slide 1 of \d+/).click();
+  await expect(page.getByRole('status')).toHaveText('Saved');
+
+  // Leave and come back through the app's own navigation (history back/forward: no full page load).
+  await page.goBack();
+  await expect(page).toHaveURL(/\/pptx$/);
+  await page.goForward();
+  await expect(page).toHaveURL(documentUrl);
+  await expect(page.locator('[data-editable]', { hasText: 'Fresh Title' })).toBeVisible();
+
+  // Changed elsewhere (another tab) while this page is away: coming back shows the newest version.
+  const id = documentUrl.split('/').pop()!;
+  const current = await (await page.request.get(`/api/documents/${id}/slides`)).json();
+  const shape = current.data.slides[0].shapes.find((s: { paragraphs: unknown[] }) => JSON.stringify(s.paragraphs).includes('Fresh Title'));
+  const put = await page.request.put(`/api/documents/${id}/slides`, {
+    data: { slides: [{ index: 0, shapes: [{ id: shape.id, paragraphs: [{ runs: [{ text: 'Edited Elsewhere' }] }] }] }] },
+  });
+  expect(put.ok()).toBe(true);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/pptx$/);
+  await page.goForward();
+  await expect(page.locator('[data-editable]', { hasText: 'Edited Elsewhere' })).toBeVisible();
+  await expect(page.locator('[data-editable]', { hasText: 'Fresh Title' })).toHaveCount(0);
+
+  // And the HTTP responses say so.
+  const api = await page.request.get(`/api/documents/${id}/slides`);
+  expect(api.headers()['cache-control']).toMatch(/no-store/);
+  const html = await page.request.get(documentUrl);
+  expect(html.headers()['cache-control']).toMatch(/no-store/);
+});
+
 test('PowerPoint-style editor: new slide, delete slide, slide show', async ({ page }) => {
   await page.goto('/pptx/lesson-plan');
   await page.getByRole('button', { name: 'Use this template' }).click();

@@ -143,6 +143,21 @@ describe('deleting', () => {
   });
 });
 
+describe('caching', () => {
+  it('never lets documents be cached, including the download', async () => {
+    const session = ctx.session();
+    const id = (await useTemplate(session, 'invoice-simple')).body.data.id as string;
+    for (const url of ['/api/documents', `/api/documents/${id}`, `/api/documents/${id}/content`]) {
+      const response = await session.request(url);
+      expect(response.headers.get('cache-control'), url).toMatch(/no-store/);
+      await response.arrayBuffer();
+    }
+    const download = await session.request(`/api/documents/${id}/download`);
+    expect(download.headers.get('cache-control')).toMatch(/no-store/);
+    await download.arrayBuffer();
+  });
+});
+
 describe('session ownership', () => {
   it("hides one session's documents from another", async () => {
     const owner = ctx.session();

@@ -19,6 +19,7 @@ import type { Env } from './shared/configs/env.js';
 import { adminAuth } from './shared/middlewares/admin-auth.js';
 import { createErrorHandler, notFoundHandler } from './shared/middlewares/error-handler.js';
 import { requestLogger } from './shared/middlewares/request-logger.js';
+import { noStore } from './shared/middlewares/no-store.js';
 import { sessionMiddleware } from './shared/middlewares/session.js';
 import type { AppBindings, Services } from './shared/types.js';
 import { validationError } from './shared/utils/api-response.js';
@@ -77,6 +78,8 @@ export function createApp(deps: AppDeps) {
   const routes = api
     .use('*', sessionMiddleware({ secure: env.NODE_ENV === 'production' && process.env.COOKIE_SECURE === 'true' }))
     .use('/admin/*', adminAuth(env.adminToken))
+    .use('/documents', noStore)
+    .use('/documents/*', noStore)
     .route('/health', healthRoutes())
     .route('/templates', templatesRoutes(templates))
     .route('/', documentsRoutes(documents))

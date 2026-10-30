@@ -50,6 +50,7 @@ function RecentList({ items }: { items: OfficeDocument[] }) {
             <Link
               to="/documents/$documentId"
               params={{ documentId: doc.id }}
+              preload={false}
               title={doc.title}
               className={`${itemClass} ${idleClass} gap-2.5 py-1.5`}
             >

@@ -13,6 +13,7 @@ function DocumentCard({ document }: { document: OfficeDocument }) {
       <Link
         to="/documents/$documentId"
         params={{ documentId: document.id }}
+        preload={false}
         aria-hidden
         tabIndex={-1}
         className={`flex aspect-[16/10] justify-center bg-gradient-to-br ${deck ? 'items-center from-orange-50 to-rose-100' : 'items-end from-sky-50 to-blue-100'}`}

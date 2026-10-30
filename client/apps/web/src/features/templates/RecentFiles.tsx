@@ -23,6 +23,7 @@ export function RecentFiles({ items }: { items: OfficeDocument[] }) {
             <Link
               to="/documents/$documentId"
               params={{ documentId: doc.id }}
+              preload={false}
               className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 "
             >
               <img
