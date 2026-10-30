@@ -1,0 +1,80 @@
+import { Link } from '@tanstack/react-router';
+import type { DocumentList, OfficeDocument } from '@office-template/server/contracts';
+import { EmptyState } from '#/components/states';
+import { buttonClass, TypeMark } from '#/components/ui';
+import { formatBytes, formatDate, typeLabel } from '#/lib/format';
+
+function DocumentCard({ document }: { document: OfficeDocument }) {
+  const deck = document.type === 'pptx';
+  return (
+    <article className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg">
+      <Link
+        to="/documents/$documentId"
+        params={{ documentId: document.id }}
+        aria-hidden
+        tabIndex={-1}
+        className={`flex aspect-[16/10] justify-center bg-gradient-to-br ${deck ? 'items-center from-orange-50 to-rose-100' : 'items-end from-sky-50 to-indigo-100'}`}
+      >
+        <img
+          src={document.thumbnailUrl}
+          alt=""
+          width={deck ? 480 : 480}
+          height={deck ? 270 : 621}
+          loading="lazy"
+          className={`h-auto bg-white shadow-[0_6px_18px_rgba(15,23,42,0.22)] ${deck ? 'w-[84%] rounded-md' : 'w-[62%] translate-y-3 rounded-t-sm'}`}
+        />
+      </Link>
+      <div className="flex flex-1 flex-col gap-1 p-4">
+        <div className="flex items-center gap-2">
+          <TypeMark type={document.type} />
+          <h2 className="truncate text-[15px] font-semibold">{document.title}</h2>
+        </div>
+        <p className="text-xs text-slate-500">
+          {typeLabel[document.type]} · Updated {formatDate(document.updatedAt)} · {formatBytes(document.sizeBytes)}
+        </p>
+        <div className="mt-auto flex gap-2 pt-3">
+          <Link to="/documents/$documentId" params={{ documentId: document.id }} className={buttonClass()}>
+            Open
+          </Link>
+          <a href={document.downloadUrl} download className={buttonClass('secondary')}>
+            Download
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export function DocumentsPage({ data }: { data: DocumentList }) {
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">My files</h1>
+        <p className="mt-2 text-slate-600">Documents and presentations you created in this browser session.</p>
+      </div>
+      {data.items.length === 0 ? (
+        <EmptyState title="You have not created anything yet">
+          Start from a{' '}
+          <Link to="/docx" className="font-medium text-brand-700 underline">
+            document
+          </Link>{' '}
+          or{' '}
+          <Link to="/pptx" className="font-medium text-brand-700 underline">
+            presentation
+          </Link>{' '}
+          template.
+        </EmptyState>
+      ) : (
+        <ul className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-6">
+          {data.items.map((document) => (
+            <li key={document.id} className="flex">
+              <div className="w-full">
+                <DocumentCard document={document} />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
