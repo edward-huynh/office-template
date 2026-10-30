@@ -107,6 +107,42 @@ describe('renaming and listing', () => {
   });
 });
 
+describe('deleting', () => {
+  const del = (session: ReturnType<typeof ctx.session>, id: string) => session.json(`/api/documents/${id}`, { method: 'DELETE' });
+
+  it('removes the document, its files and its list entry, but never the template', async () => {
+    const templateRoot = path.join(ctx.root, 'templates');
+    const before = await snapshotDir(templateRoot);
+    const session = ctx.session();
+    const id = (await useTemplate(session, 'meeting-minutes')).body.data.id as string;
+    await session.json(`/api/documents/${id}/content`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ html: '<p>edited</p>' }),
+    }); // writes the editor sidecar too
+    expect(await ctx.documentStore.exists(`${id}.docx`)).toBe(true);
+    expect(await ctx.documentStore.exists(`${id}.editor.json`)).toBe(true);
+
+    const removed = await del(session, id);
+    expect(removed.status).toBe(200);
+    expect(removed.body.data.id).toBe(id);
+
+    expect(await ctx.documentStore.exists(`${id}.docx`)).toBe(false);
+    expect(await ctx.documentStore.exists(`${id}.editor.json`)).toBe(false);
+    expect((await session.json(`/api/documents/${id}`)).status).toBe(404);
+    expect((await session.json('/api/documents')).body.data.items).toEqual([]);
+    expect(await snapshotDir(templateRoot)).toEqual(before);
+    expect((await del(session, id)).status).toBe(404); // already gone
+  });
+
+  it("cannot delete another session's document", async () => {
+    const owner = ctx.session();
+    const id = (await useTemplate(owner, 'invoice-simple')).body.data.id as string;
+    expect((await del(ctx.session(), id)).status).toBe(404);
+    expect((await owner.json(`/api/documents/${id}`)).status).toBe(200);
+  });
+});
+
 describe('session ownership', () => {
   it("hides one session's documents from another", async () => {
     const owner = ctx.session();

@@ -79,6 +79,17 @@ export class DocumentsService {
     return this.toDto(this.getOwned(id, ownerSessionId));
   }
 
+  /**
+   * Deletes the document row and its files (the DOCX/PPTX and the editor sidecar). The row goes first:
+   * a leftover file is harmless garbage, a row pointing at a missing file would be a broken document.
+   */
+  async remove(id: string, ownerSessionId: string): Promise<void> {
+    const row = this.getOwned(id, ownerSessionId);
+    this.repository.delete(row.id);
+    await this.documentStore.remove(row.filePath);
+    await this.documentStore.remove(editorStateKey(row));
+  }
+
   async getContent(id: string, ownerSessionId: string): Promise<EditorContent> {
     const row = this.getOwned(id, ownerSessionId);
     const handler = this.handlers(row.type);

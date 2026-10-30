@@ -129,6 +129,10 @@ One document. `404` if it does not exist or belongs to another session.
 
 Renames a document. Body: `{ "title": "Q3 invoice" }` (trimmed, 1–120 characters). Returns the updated document; the file itself is not touched, and the download file name follows the new title. `404` if it does not exist or belongs to another session, `422` for an empty title.
 
+### `DELETE /api/documents/{id}`
+
+Permanently deletes the document: the database row, the DOCX/PPTX copy and the editor sidecar. The template it came from is never touched. Returns `{ "success": true, "data": { "id": "…" } }`. `404` if it does not exist, was already deleted, or belongs to another session.
+
 ### `GET /api/documents/{id}/content`
 
 DOCX only. Returns the document as sanitized HTML for the editor. `400` for PPTX.

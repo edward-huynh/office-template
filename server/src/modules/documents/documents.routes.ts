@@ -68,6 +68,19 @@ const renameRoute = createRoute({
   },
 });
 
+const deleteRoute = createRoute({
+  method: 'delete',
+  path: '/documents/{id}',
+  tags: ['Documents'],
+  summary: 'Delete a document',
+  description: 'Removes the document and its files. The template it came from is never touched.',
+  request: { params: idParam },
+  responses: {
+    200: jsonResponse(z.object({ id: z.string().uuid() }), 'The id of the deleted document'),
+    404: errorResponse('Document not found'),
+  },
+});
+
 const getContentRoute = createRoute({
   method: 'get',
   path: '/documents/{id}/content',
@@ -184,6 +197,11 @@ export const documentsRoutes = (documents: DocumentsService) =>
     .openapi(renameRoute, (c) =>
       c.json(ok(documents.rename(c.req.valid('param').id, c.get('sessionId'), c.req.valid('json'))), 200),
     )
+    .openapi(deleteRoute, async (c) => {
+      const { id } = c.req.valid('param');
+      await documents.remove(id, c.get('sessionId'));
+      return c.json(ok({ id }), 200);
+    })
     .openapi(getContentRoute, async (c) =>
       c.json(ok(await documents.getContent(c.req.valid('param').id, c.get('sessionId'))), 200),
     )
