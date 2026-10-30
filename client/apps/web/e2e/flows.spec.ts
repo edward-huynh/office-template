@@ -245,6 +245,12 @@ test('command palette finds templates and my files; plus-circles in the sidebar 
   await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
   await expect(page.getByRole('textbox', { name: 'Document content' })).toBeVisible();
 
+  // Going back: the plus-circle is usable again, not stuck on its spinner.
+  await page.goBack();
+  await expect(page).toHaveURL(/\/docx$/);
+  await expect(page.getByRole('button', { name: 'New blank document' })).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.getByRole('button', { name: 'New blank document' })).toBeEnabled();
+
   // A file created earlier is found by name, with the keyboard shortcut.
   await page.goto('/');
   await page.keyboard.press('ControlOrMeta+k');
