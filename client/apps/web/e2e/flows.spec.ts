@@ -253,8 +253,13 @@ test('command palette finds templates and my files; plus-circles in the sidebar 
 
   // A file created earlier is found by name, with the keyboard shortcut.
   await page.goto('/');
-  await page.keyboard.press('ControlOrMeta+k');
-  await page.getByPlaceholder('Search templates and your files…').fill('blank');
+  const palette = page.getByPlaceholder('Search templates and your files…');
+  // The shortcut is only listened for once the page has hydrated: press it until the palette opens.
+  await expect(async () => {
+    if (!(await palette.isVisible())) await page.keyboard.press('ControlOrMeta+k');
+    await expect(palette).toBeVisible({ timeout: 1000 });
+  }).toPass();
+  await palette.fill('blank');
   await expect(page.getByRole('option').first()).toBeVisible();
   await page.getByRole('option', { name: /Blank/ }).first().click();
   await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
@@ -465,6 +470,35 @@ test('a file can be renamed in My files and the new name shows in the sidebar', 
   await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { name: 'Q3 invoice for Acme' })).toBeVisible();
   await expect(page.getByText('Discarded')).toHaveCount(0);
+});
+
+test('a file can be deleted after confirming, and disappears from My files and the sidebar', async ({ page }) => {
+  await page.goto('/docx/invoice-simple');
+  await page.getByRole('button', { name: 'Use this template' }).click();
+  await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/);
+  const documentUrl = page.url();
+
+  await page.goto('/documents');
+  await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toBeVisible();
+  const recent = page.getByRole('region', { name: 'Recent' }).getByRole('link', { name: 'Simple Invoice' });
+  await expect(recent).toBeVisible();
+
+  // Cancel keeps the file.
+  await page.getByRole('button', { name: 'Delete Simple Invoice' }).click();
+  await expect(page.getByText('This cannot be undone.')).toBeVisible();
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toBeVisible();
+
+  // Confirming removes it everywhere.
+  await page.getByRole('button', { name: 'Delete Simple Invoice' }).click();
+  await page.getByRole('button', { name: 'Delete', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Simple Invoice' })).toHaveCount(0);
+  await expect(page.getByText('You have not created anything yet')).toBeVisible();
+  await expect(recent).toHaveCount(0);
+
+  // The document itself is gone too.
+  await page.goto(documentUrl);
+  await expect(page.getByText('We could not find that document')).toBeVisible();
 });
 
 test('the sidebar lists at most the 20 most recent files', async ({ browser }) => {

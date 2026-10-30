@@ -27,6 +27,10 @@ export class DocumentsRepository {
     return (limit ? query.limit(limit) : query).all();
   }
 
+  delete(id: string): void {
+    this.db.delete(documents).where(eq(documents.id, id)).run();
+  }
+
   update(id: string, patch: Partial<Pick<DocumentRow, 'title' | 'sizeBytes' | 'updatedAt'>>): void {
     this.db.update(documents).set(patch).where(eq(documents.id, id)).run();
   }

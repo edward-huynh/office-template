@@ -103,6 +103,9 @@ export const fetchTemplate = (id: string) =>
 export const fetchDocuments = (limit?: number) =>
   call<DocumentList>(() => client().api.documents.$get({ query: limit ? { limit: String(limit) } : {} }));
 
+export const deleteDocument = (id: string) =>
+  call<{ id: string }>(() => client().api.documents[':id'].$delete({ param: { id } }));
+
 export const renameDocument = (id: string, title: string) =>
   call<OfficeDocument>(() => client().api.documents[':id'].$patch({ param: { id }, json: { title } }));
 

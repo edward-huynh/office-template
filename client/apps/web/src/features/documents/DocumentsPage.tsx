@@ -1,8 +1,9 @@
 import { Link } from '@tanstack/react-router';
 import type { DocumentList, OfficeDocument } from '@office-template/server/contracts';
 import { EmptyState } from '#/components/states';
-import { buttonClass, TypeMark } from '#/components/ui';
+import { TypeMark } from '#/components/ui';
 import { formatBytes, formatDate, typeLabel } from '#/lib/format';
+import { DocumentActions } from './DocumentActions';
 import { RenameTitle } from './RenameTitle';
 
 function DocumentCard({ document }: { document: OfficeDocument }) {
@@ -33,14 +34,7 @@ function DocumentCard({ document }: { document: OfficeDocument }) {
         <p className="text-xs text-slate-500">
           {typeLabel[document.type]} · Updated {formatDate(document.updatedAt)} · {formatBytes(document.sizeBytes)}
         </p>
-        <div className="mt-auto flex gap-2 pt-3">
-          <Link to="/documents/$documentId" params={{ documentId: document.id }} className={buttonClass()}>
-            Open
-          </Link>
-          <a href={document.downloadUrl} download className={buttonClass('secondary')}>
-            Download
-          </a>
-        </div>
+        <DocumentActions document={document} />
       </div>
     </article>
   );
