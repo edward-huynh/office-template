@@ -69,8 +69,15 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
   const [busy, setBusy] = useState(false);
 
   const deckRef = useRef(deck);
-  const dirty = useRef(new Set<string>());
+  // Unsaved text boxes ("slide:shape" → edit number). A save removes only the edits it sent, so a box
+  // edited again while a save is in flight stays dirty.
+  const dirty = useRef(new Map<string, number>());
+  const editSeq = useRef(0);
+  /** True from a keystroke until its text box reports the text (200 ms debounce): the file is already behind the screen. */
+  const inputPending = useRef(false);
   const titleDirty = useRef(false);
+  const titleRef = useRef(doc.title);
+  const saveQueue = useRef<Promise<boolean>>(Promise.resolve(true));
   const workspace = useRef<HTMLDivElement>(null);
   const lastRange = useRef<Range | null>(null);
   const pendingSize = useRef<number | null>(null);
@@ -102,7 +109,8 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
       };
       deckRef.current = next;
       setDeck(next);
-      dirty.current.add(`${slideIndex}:${shapeId}`);
+      dirty.current.set(`${slideIndex}:${shapeId}`, ++editSeq.current);
+      inputPending.current = false;
       markDirty();
     },
     [markDirty],
@@ -206,52 +214,82 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
     const onInput = (event: Event) => {
       const editable = editableOf(event.target as Node);
       if (editable && pendingSize.current) normalizeSizes(editable, pendingSize.current);
+      if (editable) {
+        // Show "Unsaved changes" at the first keystroke, not 200 ms later, so an earlier save finishing
+        // cannot flip the status to "Saved" while text is still waiting to be reported.
+        inputPending.current = true;
+        markDirty();
+      }
     };
     window.document.addEventListener('input', onInput, true);
     return () => window.document.removeEventListener('input', onInput, true);
-  }, [normalizeSizes]);
+  }, [normalizeSizes, markDirty]);
 
   // ------------------------------------------------------------------- saving and structure
 
-  const flushFocused = () => {
-    // Make sure every text box has reported its latest text, wherever focus is.
-    (window.document.activeElement as HTMLElement | null)?.blur?.();
+  /** Makes every text box report its latest text, wherever focus is. Blurring is skipped for autosave so the caret stays put. */
+  const flushFocused = (keepFocus: boolean) => {
+    if (!keepFocus) (window.document.activeElement as HTMLElement | null)?.blur?.();
     window.dispatchEvent(new Event(FLUSH_EVENT));
   };
 
-  const save = useCallback(async (): Promise<boolean> => {
-    flushFocused();
+  const saveNow = async (keepFocus: boolean): Promise<boolean> => {
+    flushFocused(keepFocus);
     // Blur commits asynchronously through React state; wait a tick so `deck` is current.
     await new Promise((resolve) => setTimeout(resolve, 0));
     if (dirty.current.size === 0 && !titleDirty.current) {
-      setStatus('saved');
+      // A keystroke or format change since the flush above is still waiting to be reported.
+      setStatus(inputPending.current ? 'dirty' : 'saved');
       return true;
     }
+    const sent = [...dirty.current];
+    const sentTitle = titleDirty.current;
+    titleDirty.current = false;
     setStatus('saving');
     setMessage(undefined);
     try {
       const bySlide = new Map<number, string[]>();
-      for (const key of dirty.current) {
+      for (const [key] of sent) {
         const [slideIndex, shapeId] = key.split(':') as [string, string];
         bySlide.set(Number(slideIndex), [...(bySlide.get(Number(slideIndex)) ?? []), shapeId]);
       }
       await saveSlides(doc.id, {
-        title: title.trim() || doc.title,
+        title: titleRef.current.trim() || doc.title,
         slides: [...bySlide].map(([index, ids]) => ({
           index,
           shapes: ids.map((id) => ({ id, paragraphs: deckRef.current.slides[index]!.shapes.find((s) => s.id === id)!.paragraphs })),
         })),
       });
-      dirty.current.clear();
-      titleDirty.current = false;
-      setStatus('saved');
+      for (const [key, edit] of sent) if (dirty.current.get(key) === edit) dirty.current.delete(key);
+      // Anything edited while the request was in flight is still unsaved.
+      setStatus(dirty.current.size > 0 || titleDirty.current || inputPending.current ? 'dirty' : 'saved');
       return true;
     } catch (error) {
+      if (sentTitle) titleDirty.current = true;
       setStatus('error');
       setMessage(error instanceof ApiClientError ? error.message : 'Could not save your changes.');
       return false;
     }
-  }, [doc.id, doc.title, title]);
+  };
+
+  /** Saves run one at a time, so a click-away save and a Save button press never send the same edits twice. */
+  const save = useCallback((options?: { keepFocus?: boolean }): Promise<boolean> => {
+    const run = saveQueue.current.then(() => saveNow(options?.keepFocus ?? false));
+    saveQueue.current = run;
+    return run;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doc.id, doc.title]);
+
+  // Autosave: a press anywhere outside a slide text box (the capture phase sees it before the target
+  // does, like a form's click-away handler) saves what has changed. Pressing inside a box keeps editing.
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      if ((event.target as Element | null)?.closest?.('[data-editable="true"]')) return;
+      void save({ keepFocus: true });
+    };
+    window.document.addEventListener('pointerdown', onPointerDown, true);
+    return () => window.document.removeEventListener('pointerdown', onPointerDown, true);
+  }, [save]);
 
   useEffect(() => {
     if (status !== 'dirty') return;
@@ -415,6 +453,7 @@ export default function PptxEditor({ doc, initialDeck }: { doc: OfficeDocument; 
         title={title}
         onTitleChange={(value) => {
           setTitle(value);
+          titleRef.current = value;
           titleDirty.current = true;
           markDirty();
         }}

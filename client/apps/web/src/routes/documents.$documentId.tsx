@@ -9,6 +9,13 @@ const DocxEditor = lazy(() => import('#/features/documents/DocxEditor'));
 const PptxEditor = lazy(() => import('#/features/documents/PptxEditor'));
 
 export const Route = createFileRoute('/documents/$documentId')({
+  // Never cached: not by the router (it would keep the loader result and show it again on back/forward
+  // or after a hover preload) and not by the browser. The document changes whenever it is saved.
+  staleTime: 0,
+  gcTime: 0,
+  preloadStaleTime: 0,
+  preloadGcTime: 0,
+  headers: () => ({ 'Cache-Control': 'no-store' }),
   // The editors need the browser. The loader still runs on the server, so the content is ready
   // when the editor mounts.
   ssr: 'data-only',

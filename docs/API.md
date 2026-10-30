@@ -94,6 +94,8 @@ Creates a copy of the template for the current session. The template is not modi
 
 ### `GET /api/documents`
 
+All `/api/documents…` responses carry `Cache-Control: private, no-store`.
+
 Documents of the current session, most recently updated first. Optional query `limit` (1–100) returns only the latest N; the web app's sidebar asks for 20.
 
 ```json
