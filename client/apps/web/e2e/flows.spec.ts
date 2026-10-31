@@ -83,34 +83,30 @@ test('quick preview opens in a modal, shows the images, and closes with Escape o
   await expect(dialog).toHaveCount(0);
 });
 
-test('quick preview: a long document scrolls inside the modal and the Use button stays reachable', async ({ page }) => {
-  // A short window makes any document "long": its pages are taller than the modal.
+test('quick preview of a document shows the first page only, sized to fit the modal', async ({ page }) => {
+  // A short window: the page image must shrink to fit, not overflow, and the Use button stays reachable.
   await page.setViewportSize({ width: 1280, height: 420 });
   await page.goto('/docx');
   await page.getByRole('link', { name: 'Preview' }).first().click();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator('img').first()).toBeVisible();
+  const pageImage = dialog.getByRole('img', { name: /page 1/ });
+  await expect(pageImage).toBeVisible();
+  await expect(dialog.getByRole('img', { name: /page 2/ })).toHaveCount(0); // never more than one page
+  await expect(dialog.locator('img')).toHaveCount(1);
 
-  const pages = dialog.getByRole('list').first().locator('..'); // the scrollable pages pane
-  const metrics = await pages.evaluate((el) => ({ scroll: el.scrollHeight, client: el.clientHeight, overflowY: getComputedStyle(el).overflowY }));
-  expect(metrics.scroll).toBeGreaterThan(metrics.client); // there is more to see...
-  expect(metrics.overflowY).toBe('auto'); // ...and the pane scrolls
   const box = (await dialog.boundingBox())!;
   expect(box.y).toBeGreaterThanOrEqual(0);
   expect(box.y + box.height).toBeLessThanOrEqual(420); // the modal fits the window
+  const image = (await pageImage.boundingBox())!;
+  expect(image.y + image.height).toBeLessThanOrEqual(box.y + box.height); // so does the page image
 
-  // The side panel's button is inside the window, not pushed out by a tall preview.
-  const use = dialog.getByRole('button', { name: 'Use this template' });
-  await expect(use).toBeInViewport();
-
-  // The pane really scrolls with the mouse wheel.
-  await pages.hover();
-  await page.mouse.wheel(0, 400);
-  await expect.poll(() => pages.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
+  // At a more usual laptop height the Use button is in view without scrolling.
+  await page.setViewportSize({ width: 1280, height: 640 });
+  await expect(dialog.getByRole('button', { name: 'Use this template' })).toBeInViewport();
 });
 
-test('quick preview of a document lists its pages and links to the full page', async ({ page }) => {
+test('quick preview of a document links to the full page, which lists every page', async ({ page }) => {
   await page.goto('/docx');
   await page.getByRole('link', { name: 'Preview' }).first().click();
   const dialog = page.getByRole('dialog');
