@@ -18,10 +18,19 @@ function upload(file: Buffer | string, fields: Record<string, string> = {}) {
   form.set('category', fields.category ?? 'Custom');
   form.set('description', fields.description ?? 'A template added through the admin API');
   if (fields.id) form.set('id', fields.id);
+  if (fields.type) form.set('type', fields.type);
   return ctx.session().json('/api/admin/templates', { method: 'POST', body: form });
 }
 
 describe('POST /api/admin/templates', () => {
+  it('accepts a matching type and rejects a type that disagrees with the file', async () => {
+    expect((await upload(validDocx, { name: 'Typed Doc', type: 'docx' })).status).toBe(201);
+    const wrong = await upload(validDocx, { name: 'Wrong Type', type: 'pptx' });
+    expect(wrong.status).toBe(415);
+    expect(wrong.body.message).toMatch(/DOCX file, but the selected type is PPTX/);
+    expect((await upload(validDocx, { name: 'Bad Type', type: 'xlsx' })).status).toBe(422);
+  });
+
   it('adds a template that immediately appears in the catalog and can be used', async () => {
     const created = await upload(validDocx, { name: 'Uploaded Template' });
     expect(created.status).toBe(201);

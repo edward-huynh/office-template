@@ -9,7 +9,7 @@ export const Route = createFileRoute('/admin/templates')({
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Add a template</h1>
         <p className="mt-2 text-slate-600">
-          Upload a DOCX or PPTX file. The file type is detected from its contents. Uploading an existing name with a
+          Choose the type, pick or create a category, and upload a DOCX or PPTX file (the server checks that the file really is that type). Uploading an existing name with a
           different file creates a new version.
         </p>
       </div>

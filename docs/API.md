@@ -226,6 +226,7 @@ No authentication is required (see the security note in the limitations). `multi
 | Field | Required | Notes |
 | --- | --- | --- |
 | `file` | yes | DOCX or PPTX. The type is detected from the **contents**. |
+| `type` | no | `docx` or `pptx`. The admin form always sends it. When present it must match the detected type, otherwise `415` ("The file is a PPTX file, but the selected type is DOCX"). |
 | `name` | yes | ≤ 120 chars |
 | `category` | yes | ≤ 60 chars |
 | `description` | yes | ≤ 500 chars |
