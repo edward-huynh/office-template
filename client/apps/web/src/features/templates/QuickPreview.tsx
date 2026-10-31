@@ -94,15 +94,15 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
               </ol>
             </div>
           ) : (
-            // A document shows its first page only, sized to fit the modal (the modal's padding is
-            // 3rem, the window margin 1.5rem); "Open full page" has every page.
+            // A document shows its first page only, as tall as the modal's content box (the modal is
+            // min(window - 1.5rem, 56rem) high with 3rem of padding); "Open full page" has every page.
             <div className="grid h-full min-h-0 place-items-center">
               <img
                 src={template.previewUrls[0]}
                 alt={`${template.name}, page 1`}
                 width={720}
                 height={932}
-                className="block h-auto max-h-[calc(100dvh-4.5rem)] w-auto max-w-full bg-white object-contain ring-1 ring-black/10 md:max-h-full"
+                className="block h-auto max-h-[calc(min(100dvh-1.5rem,56rem)-3rem)] w-auto max-w-full bg-white object-contain ring-1 ring-black/10"
               />
             </div>
           )}

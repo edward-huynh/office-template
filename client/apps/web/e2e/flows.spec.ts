@@ -100,6 +100,9 @@ test('quick preview of a document shows the first page only, sized to fit the mo
   expect(box.y + box.height).toBeLessThanOrEqual(420); // the modal fits the window
   const image = (await pageImage.boundingBox())!;
   expect(image.y + image.height).toBeLessThanOrEqual(box.y + box.height); // so does the page image
+
+  // At a more usual laptop height the Use button is in view without scrolling.
+  await page.setViewportSize({ width: 1280, height: 640 });
   await expect(dialog.getByRole('button', { name: 'Use this template' })).toBeInViewport();
 });
 
