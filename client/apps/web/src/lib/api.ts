@@ -133,8 +133,6 @@ export const createDocumentFromTemplate = (templateId: string) =>
 export const saveDocumentContent = (id: string, input: UpdateDocumentInput) =>
   call<OfficeDocument>(() => client().api.documents[':id'].content.$put({ param: { id }, json: input }));
 
-export async function uploadTemplate(form: FormData, adminToken: string): Promise<Template> {
-  return call<Template>(() =>
-    fetch('/api/admin/templates', { method: 'POST', body: form, headers: { 'x-admin-token': adminToken } }),
-  );
+export async function uploadTemplate(form: FormData): Promise<Template> {
+  return call<Template>(() => fetch('/api/admin/templates', { method: 'POST', body: form }));
 }

@@ -18,14 +18,12 @@ const uploadRoute = createRoute({
   tags: ['Admin'],
   summary: 'Add or update a template',
   description:
-    'Requires the `x-admin-token` header. The type (DOCX or PPTX) is detected from the file contents. ' +
+    'The type (DOCX or PPTX) is detected from the file contents. ' +
     'Uploading an existing id with a different file creates a new template version.',
-  security: [{ adminToken: [] }],
   request: { body: { required: true, content: { 'multipart/form-data': { schema: uploadSchema } } } },
   responses: {
     200: jsonResponse(templateSchema, 'Existing template updated'),
     201: jsonResponse(templateSchema, 'Template created'),
-    401: errorResponse('Missing or invalid admin token'),
     413: errorResponse('File too large'),
     415: errorResponse('Not a valid DOCX or PPTX file'),
     422: errorResponse('Invalid form fields'),

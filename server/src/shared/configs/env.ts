@@ -19,7 +19,6 @@ const envSchema = z.object({
   DOC_WORKERS: z.coerce.number().int().min(0).max(8).default(1),
   MAX_UPLOAD_MB: z.coerce.number().min(1).max(100).default(10),
   /** Token required by `/api/admin/*`. Mandatory in production. */
-  ADMIN_TOKEN: z.string().min(8).optional(),
   /** Optional LibreOffice binary used to render previews of uploaded templates. */
   SOFFICE_PATH: z.string().optional(),
   PDFTOPPM_PATH: z.string().optional(),
@@ -29,7 +28,6 @@ export type Env = z.infer<typeof envSchema> & {
   databasePath: string;
   catalogDir: string;
   storageDir: string;
-  adminToken: string | undefined;
 };
 
 const resolveFromRoot = (value: string) =>
@@ -41,9 +39,6 @@ export function parseEnv(source: NodeJS.ProcessEnv = process.env): Env {
     throw new Error(`Invalid environment configuration:\n${z.prettifyError(parsed.error)}`);
   }
   const env = parsed.data;
-  if (env.NODE_ENV === 'production' && !env.ADMIN_TOKEN) {
-    throw new Error('Invalid environment configuration:\nADMIN_TOKEN is required in production');
-  }
   return {
     ...env,
     databasePath:
@@ -51,6 +46,5 @@ export function parseEnv(source: NodeJS.ProcessEnv = process.env): Env {
     catalogDir: resolveFromRoot(env.CATALOG_DIR),
     storageDir: resolveFromRoot(env.STORAGE_DIR),
     // Development convenience only; never applied in production.
-    adminToken: env.ADMIN_TOKEN ?? (env.NODE_ENV === 'production' ? undefined : 'dev-admin-token'),
   };
 }

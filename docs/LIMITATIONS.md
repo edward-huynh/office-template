@@ -31,7 +31,7 @@
 - SSR for library, preview and "My files"; real HTTP 404s; Open Graph tags on preview pages.
 - Dia-style layout with a command palette (beUI, Cmd/Ctrl+K) for templates and your files, plus-circles on Documents and Presentations that create blank files, and beUI Button, Input, Tabs, Select and Combobox throughout.
 - DOCX/PPTX conversions run in a worker thread so large saves never stall the API; `pnpm perf` measures frames and long tasks.
-- Tests: 88 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 34 end-to-end tests (Playwright), typecheck for both packages.
+- Tests: 86 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 34 end-to-end tests (Playwright), typecheck for both packages.
 
 ## Not completed
 
@@ -40,7 +40,7 @@
 | **Screen-recording video** | A required deliverable that cannot be produced by the code. It must be recorded separately. |
 | Undo for deletion, bulk actions | Documents can be created, opened, edited, renamed, downloaded and deleted (after a confirmation). Deleting is permanent: there is no trash or undo, and no multi-select. |
 | Template deletion and rollback | Templates can be added and updated (versioned) but not removed through the API. |
-| Real authentication | Sessions are anonymous cookies. Clearing cookies loses access to your files. The admin API uses one static token. |
+| Real authentication | Sessions are anonymous cookies. Clearing cookies loses access to your files. **The admin upload (`/admin/templates`, `POST /api/admin/templates`) has no authentication**: anyone who can reach the server can add or update a template. This was chosen to keep the demo simple; uploads are validated, but a public deployment must put authentication in front of it. |
 | Rate limiting, antivirus scanning, quotas | Uploads are validated and size-limited but not scanned. |
 | Autosave in the Word-style editor, and collaboration | The PowerPoint-style editor autosaves when you click outside the text; the Word-style editor saves only with Save or Ctrl+S. There is no real-time collaboration. |
 | Internationalisation | English only. |
@@ -83,4 +83,4 @@
 - **Higher-fidelity DOCX editing.** Edit the DOCX XML directly (as the PPTX editor does) or embed a full document editor against the same document endpoints; this would also give real pagination, headers and footers.
 - **More Office types.** Add `doctypes/xlsx/`, register it, add a viewer or editor component.
 - **Object storage and scale.** Implement `FileStore` for S3 and swap SQLite for Postgres (Drizzle supports both).
-- **Authentication.** Replace the session middleware; `ownerSessionId` becomes a user id and the admin token becomes a role.
+- **Authentication.** Replace the session middleware; `ownerSessionId` becomes a user id, and the admin upload gets an admin role check.

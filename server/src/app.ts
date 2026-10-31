@@ -16,7 +16,6 @@ import { TemplatesRepository } from './modules/templates/templates.repository.js
 import { templatesRoutes } from './modules/templates/templates.routes.js';
 import { TemplatesService } from './modules/templates/templates.service.js';
 import type { Env } from './shared/configs/env.js';
-import { adminAuth } from './shared/middlewares/admin-auth.js';
 import { createErrorHandler, notFoundHandler } from './shared/middlewares/error-handler.js';
 import { requestLogger } from './shared/middlewares/request-logger.js';
 import { noStore } from './shared/middlewares/no-store.js';
@@ -59,11 +58,6 @@ export function createApp(deps: AppDeps) {
     },
   });
 
-  api.openAPIRegistry.registerComponent('securitySchemes', 'adminToken', {
-    type: 'apiKey',
-    in: 'header',
-    name: 'x-admin-token',
-  });
   api.doc('/openapi.json', {
     openapi: '3.0.3',
     info: {
@@ -77,7 +71,6 @@ export function createApp(deps: AppDeps) {
 
   const routes = api
     .use('*', sessionMiddleware({ secure: env.NODE_ENV === 'production' && process.env.COOKIE_SECURE === 'true' }))
-    .use('/admin/*', adminAuth(env.adminToken))
     .use('/documents', noStore)
     .use('/documents/*', noStore)
     .route('/health', healthRoutes())

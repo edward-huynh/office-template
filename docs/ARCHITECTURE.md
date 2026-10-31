@@ -82,7 +82,7 @@ Controllers are merged into route files. Hono infers request and response types 
 | --- | --- |
 | `templates` | Query the catalog, return template detail, stream template images (thumbnail and preview pages). Contains the manifest loader and the **template importer**. |
 | `documents` | Create a document from a template (copy-on-use), list the session's documents, read and write editor content, download. |
-| `admin` | Upload a new template (validated file, generated preview), protected by `x-admin-token`. |
+| `admin` | Upload a new template (validated file, generated preview), not protected by a login (see the limitations). |
 | `health` | Liveness check. |
 
 ### 4.2 DocType handlers
@@ -294,7 +294,7 @@ Every route has pending, error and not-found handling (defaults in `router.tsx`;
 | XSS | Editor HTML is sanitized with an allow-list (`sanitize-html`) on read and on write; preview SVGs are served with a locked-down CSP |
 | Session | Random UUID in an `httpOnly`, `SameSite=Lax` cookie; documents are scoped by owner in the query itself |
 | Template immutability | The document service holds a read-only store view; verified by test |
-| Admin | `x-admin-token` compared in constant time; required in production |
+| Admin upload | No authentication by design for this test: anyone who can reach the API can add a template. Uploads are still validated (type detected from the file contents, size limit, ZIP structure, slug-checked ids) |
 | Headers | `secureHeaders` on all responses; downloads use `Content-Disposition: attachment` and `nosniff` |
 | LIKE injection | `%` and `_` in search text are escaped |
 
