@@ -1,104 +1,127 @@
 # Office Template Library
 
-A working template gallery for Office documents. Pick a **Word (DOCX)** or **PowerPoint (PPTX)** template, preview it, and create your own copy. Both types open in an editor modelled on Word and PowerPoint (ribbon, page or slide canvas, status bar) and download as standard Office files. The original templates are never modified.
+A template library for Office files. You pick a Word (DOCX) or PowerPoint (PPTX) template, preview it, and create your own copy. The copy opens in a built-in editor and can be downloaded as a normal .docx or .pptx file. Using or editing a copy never changes the original template.
 
-- **Blank files**: "Start from scratch" tiles create a blank document (an empty Word-style page) or a blank presentation (one slide with empty title and content boxes).
-- **Layout**: a Dia-style window: a tinted backdrop with the navigation rail directly on it (a search box that opens a command palette, Cmd/Ctrl+K, to find templates and your files, and a plus-circle on Documents and Presentations that starts a blank file), and the page as one rounded floating panel.
-- **Gallery**: a modern template gallery: sidebar navigation, a hero banner, All / Documents / Presentations tabs, category chips, rounded thumbnail cards with hover actions, a quick-preview modal, and a "continue where you left off" row of your recent files.
-- **Documents**: 6 sample templates, searchable and filterable, edited in a Word-style editor (fonts, sizes, colours, alignment, lists, tables, ruler, page count, zoom).
-- **Presentations**: 4 sample decks with slide-by-slide preview, edited in a PowerPoint-style editor (thumbnails, in-place text editing and formatting, new/delete slide, slide show).
-- **One platform** behind both: a `type` field, a shared API, and a registry that makes new Office types an additive change.
+This is the take-home test for the Fullstack Developer position. It covers both products in one app: the document library (product 1) and the presentation library (product 2).
+
+**Demo video:** https://pub-561bc66165e84df2b3293d6d7e26f366.r2.dev/review-template-demo.mp4
+
+## What it does
+
+- **Library**: grid of templates with thumbnail, name, description and category. Search, type tabs (All / Documents / Presentations), category filter, pagination, quick-preview modal, and a separate preview page per template.
+- **Documents**: 6 sample templates plus a blank document. The editor is built on TipTap (font, size, colour, alignment, lists, tables, page count, zoom).
+- **Presentations**: 4 sample decks plus a blank presentation. Every slide can be previewed. The editor edits text in place, adds and deletes slides, and has a slide show mode.
+- **My files**: the files you created in this browser session. You can rename, delete and download them.
+- **Add templates**: drop a folder into `server/templates/` or upload through `/admin/templates`. The UI needs no change.
+
+What is done, what is not, and the technical limits are listed in [docs/LIMITATIONS.md](docs/LIMITATIONS.md). Short version: the DOCX editor works on HTML, so complex features (headers, footers, images, comments) are not kept when a document is saved from the editor. The PPTX editor edits text only; shapes, pictures and layouts stay in the file but cannot be changed.
+
+## Tech stack
 
 | | |
 | --- | --- |
-| Frontend | TanStack Start (React 19, SSR), TanStack Router and Form, TipTap, Tailwind CSS, [beUI](https://beui.dev) components (Button, Input, Tabs, Select, Combobox) |
+| Frontend | TanStack Start (React 19, SSR), TanStack Router and Form, TipTap, Tailwind CSS, a few [beUI](https://beui.dev) components |
 | Backend | Hono on Node, zod, OpenAPI/Swagger |
-| Data | SQLite (Drizzle ORM), local file storage |
-| Tests | Vitest (87), Playwright (37) |
+| Database | SQLite through Drizzle ORM |
+| File storage | Local disk (`server/storage/`) |
+| Tests | Vitest (87 tests), Playwright (37 tests) |
 
-## Quick start
+Third-party libraries and their licenses are in [docs/LICENSES.md](docs/LICENSES.md).
 
-Requirements: **Node 22+** (developed on 24) and **pnpm 10**.
+## Run it
+
+You need **Node 22 or newer** (developed on 24) and **pnpm 10**.
 
 ```bash
 pnpm install
-pnpm start       # builds the web app, then runs the API on :3001 and the web app on :3000
+pnpm start
 ```
 
-Open <http://localhost:3000>. API docs: <http://localhost:3000/api/docs>.
+`pnpm start` builds the web app, then runs the API on port 3001 and the web app on port 3000. Open <http://localhost:3000>. API docs (Swagger) are at <http://localhost:3000/api/docs>.
 
-**No separate seed step.** When the API starts it checks the database against the template catalog in `server/templates/`: on the first run (empty database) it imports all sample templates; on later runs it finds everything already imported and just starts. The check is idempotent, so templates you add or change in `server/templates/` are picked up on the next start too. The log says which case it was (`Template catalog imported: …` or `Template catalog already imported (…)`). Set `AUTO_SEED=false` to turn this off.
+There is no separate seed step. On start the API compares the database with `server/templates/` and imports anything missing, so the first run imports all samples and later runs skip them. Set `AUTO_SEED=false` to turn this off.
 
-DOCX/PPTX conversions run in a worker thread (`DOC_WORKERS`, default 1; `0` runs them on the main thread), so saving a big document never stalls the API for other visitors.
+For hot reload use `pnpm dev`.
 
-For development with hot reload, use `pnpm dev` instead of `pnpm start`.
-
-**Optional: real previews for uploaded templates.** The sample templates ship with pre-rendered previews. Templates uploaded through the admin API get real page images when LibreOffice and poppler are on your `PATH`; otherwise they get a placeholder image. On macOS: `brew install --cask libreoffice && brew install poppler`. On Debian/Ubuntu: `apt install libreoffice-writer libreoffice-impress poppler-utils`. The server logs which mode it is in at start-up.
-
-### With Docker
+**Docker:**
 
 ```bash
 docker compose up --build
 ```
 
-Open <http://localhost:3000>. The API image includes LibreOffice (used to render previews of uploaded templates). See the note in [docs/LIMITATIONS.md](docs/LIMITATIONS.md): the images were not built in the authoring environment.
+I did not build the Docker images in my development environment, so this path is untested. See [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
+
+**Optional, for uploaded templates:** the sample templates come with pre-rendered preview images. For templates you upload, real page images need LibreOffice and poppler on your `PATH`; without them the upload gets a placeholder image. On macOS: `brew install --cask libreoffice && brew install poppler`. On Debian/Ubuntu: `apt install libreoffice-writer libreoffice-impress poppler-utils`.
 
 ## Try it
 
-1. For a blank file, click **Blank document** or **Blank presentation** under "Start from scratch" on the gallery. Otherwise, on the home gallery, hover a card (or use the type tabs and category chips), click **Preview** for a quick look in a modal (arrow keys move through slides), then **Use this template**. **Open full page** gives each template its own shareable URL.
-2. In the Word-style editor, select text and change the font, size, colour or alignment on the **Home** tab; click in a table to get the **Table Layout** tab. Press **Save** (or Ctrl/Cmd+S), then **Download DOCX**.
-3. **Presentations** → **Modern Pitch Deck** → **Use this template**. Click any text on the slide to edit it in place, format it on the **Home** tab (changes save automatically when you click anywhere outside the text; **Save** / Ctrl+S still work), use **New Slide** / **Delete**, try **Present** (arrow keys, Esc to exit), then **Download PPTX**.
-4. **My files** lists everything created in this browser session; the pencil next to a name renames it (Enter saves, Escape cancels) and the trash icon deletes it after a confirmation. The sidebar's **Recent** list shows your 20 latest files.
-5. Prove the original is untouched: use the same template again; the new copy starts without your edits.
-6. Add a template: <http://localhost:3000/admin/templates> (no login: see the security note in [docs/LIMITATIONS.md](docs/LIMITATIONS.md)).
-7. Turn JavaScript off: the library, filters, `?q=` search URLs and preview pages still work, because they are server-rendered.
+1. On the home page, hover a template and click **Preview** (arrow keys move between slides), then **Use this template**. **Blank document** and **Blank presentation** start an empty file.
+2. In the document editor, change some text and formatting on the **Home** tab, press **Save** (Ctrl/Cmd+S), then **Download DOCX**.
+3. Open a presentation template (for example Modern Pitch Deck). Click any text on a slide to edit it, add or delete a slide, try **Present**, then **Download PPTX**. Edits save automatically when you click outside the text.
+4. Open **My files** to see your copies. The pencil renames, the trash icon deletes after a confirmation.
+5. Check that the original is untouched: use the same template again and the new copy starts without your edits.
+6. Add a template at <http://localhost:3000/admin/templates>. This page has no login (see the security note in [docs/LIMITATIONS.md](docs/LIMITATIONS.md)).
+
+## How a copy stays independent of the template
+
+`POST /api/templates/:id/use` reads the template through a read-only view of the template store and writes a new file, `documents/<uuid>.<ext>`, owned by the visitor's session. Editing and downloading only touch that new file. One test takes a snapshot of every template file before and after using and editing a document and checks that the snapshots are identical.
+
+## API overview
+
+| Method and path | Purpose |
+| --- | --- |
+| `GET /api/templates` | List templates (`type`, `category`, `q`, `page`, `pageSize`) |
+| `GET /api/templates/:id` | One template |
+| `GET /api/templates/:id/thumbnail`, `/pages/:index` | Thumbnail and preview page images |
+| `POST /api/templates/:id/use` | Create a document from a template |
+| `GET /api/documents` | Documents of the current session |
+| `GET/PATCH/DELETE /api/documents/:id` | Read, rename, delete a document |
+| `GET/PUT /api/documents/:id/content` | Read and save a DOCX document |
+| `GET/PUT /api/documents/:id/slides` | Read and save a PPTX document |
+| `POST /api/documents/:id/slides/:index/duplicate`, `DELETE /api/documents/:id/slides/:index` | Add and delete a slide |
+| `GET /api/documents/:id/download` | Download the DOCX or PPTX |
+| `POST /api/admin/templates` | Add or update a template |
+
+Request and response details, error format and the template manifest format are in [docs/API.md](docs/API.md).
+
+## Add a template without the UI
+
+1. Create `server/templates/docx/my-template/` (or `pptx/`) with `manifest.json`, the file, a thumbnail and preview images. The format is in [docs/API.md](docs/API.md#manifest-format).
+2. Restart the API, or run `pnpm seed` while it is running.
 
 ## Commands
 
 | Command | Purpose |
 | --- | --- |
-| `pnpm start` | Build the web app and run API + web (the API imports the template catalog on start if needed) |
+| `pnpm start` | Build the web app and run API and web |
 | `pnpm dev` | Run API and web with hot reload |
-| `pnpm seed` | Import `server/templates/**` by hand (the API does this automatically on start) |
+| `pnpm seed` | Import `server/templates/**` by hand |
 | `pnpm generate:templates` | Regenerate the sample templates and previews |
-| `pnpm test` | Server unit and integration tests |
-| `pnpm test:e2e` | Playwright end-to-end tests (needs Google Chrome; builds the app on ports 4000/4001) |
+| `pnpm test` | Server unit and integration tests (3 need LibreOffice and are skipped without it) |
+| `pnpm test:e2e` | Playwright tests (needs Google Chrome; uses ports 4000 and 4001) |
 | `pnpm typecheck` | Type-check both packages |
 | `pnpm build` | Production build of the web app |
-| `pnpm --filter @office-template/web analyze` | JS/CSS size per page of a running build |
-| `pnpm --filter @office-template/web perf` | Frame times and long tasks in Chrome for the heaviest interactions (a ~9k-word document, a 60-slide deck); add `--throttle=4` to emulate a slower CPU |
 
-`pnpm start` runs in development mode. For a production run, start the API with `NODE_ENV=production` (`pnpm --filter @office-template/server start`) and the web app (`pnpm --filter @office-template/web start`) with `API_INTERNAL_URL` pointing at the API.
-
-## Add a template without touching the UI
-
-1. Create `server/templates/docx/my-template/` (or `pptx/`) containing `manifest.json`, the file, a thumbnail and preview images. See the format in [docs/API.md](docs/API.md#manifest-format).
-2. Restart the API (`pnpm start`), or run `pnpm seed` while it is running.
-
-It appears in the library immediately. Or upload a file through `/admin/templates` or `POST /api/admin/templates`.
-
-## How the copy stays independent
-
-`POST /api/templates/:id/use` reads the template through a **read-only view** of the template store and writes a new file, `documents/<uuid>.<ext>`, owned by the visitor's session. Editing and downloading touch only that file. A test snapshots every template file before and after using and editing a document and requires the snapshots to be identical.
+`pnpm start` runs in development mode. For production, start the API with `NODE_ENV=production` (`pnpm --filter @office-template/server start`) and the web app (`pnpm --filter @office-template/web start`) with `API_INTERNAL_URL` pointing at the API.
 
 ## Documentation
 
 | Document | Contents |
 | --- | --- |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design, data model, flows, SSR and bundle strategy, security, testing |
-| [docs/API.md](docs/API.md) | Endpoints, errors, manifest format (and live Swagger at `/api/docs`) |
-| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | What is done, what is not, technical limits, extension paths |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Design, data model, main flows, security, testing |
+| [docs/API.md](docs/API.md) | Endpoints, errors, manifest format |
+| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Done, not done, technical limits, how to extend |
 | [docs/LICENSES.md](docs/LICENSES.md) | Third-party licenses and AI-assistance disclosure |
 
 ## Repository layout
 
 ```
-client/apps/web/   TanStack Start app: routes, features, e2e tests
-server/            Hono API: modules, doctypes, infra, contracts, templates, tests
+client/apps/web/   Web app: routes, features, e2e tests
+server/            API: modules, document type handlers, infra, templates, tests
 docs/              Documentation
 docker-compose.yml
 ```
 
-## Notes on AI assistance
+## AI assistance
 
-Built with an AI coding assistant (Claude Code). Details and how the output was verified are in [docs/LICENSES.md](docs/LICENSES.md).
+I built this with an AI coding assistant (Claude Code). How I checked its output is described in [docs/LICENSES.md](docs/LICENSES.md).
