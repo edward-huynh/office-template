@@ -37,7 +37,6 @@
 
 | Item | Notes |
 | --- | --- |
-| **Screen-recording video** | A required deliverable that cannot be produced by the code. It must be recorded separately. |
 | Undo for deletion, bulk actions | Documents can be created, opened, edited, renamed, downloaded and deleted (after a confirmation). Deleting is permanent: there is no trash or undo, and no multi-select. |
 | Template deletion and rollback | Templates can be added and updated (versioned) but not removed through the API. |
 | Real authentication | Sessions are anonymous cookies. Clearing cookies loses access to your files. **The admin upload (`/admin/templates`, `POST /api/admin/templates`) has no authentication**: anyone who can reach the server can add or update a template. This was chosen to keep the demo simple; uploads are validated, but a public deployment must put authentication in front of it. |
