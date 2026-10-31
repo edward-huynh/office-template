@@ -614,9 +614,8 @@ test('a missing document shows the not-found page', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Browse documents' })).toBeVisible();
 });
 
-test('an admin can add a template and it appears in the library', async ({ page }) => {
+test('a template can be added from the admin page and appears in the library', async ({ page }) => {
   await page.goto('/admin/templates');
-  await page.getByLabel('Admin token').fill('dev-admin-token');
   await page.getByLabel('Template name').fill('Uploaded By E2E');
   await page.getByLabel('Category').fill('Testing');
   await page.getByLabel('Short description').fill('Template added by the end-to-end test.');
@@ -628,13 +627,13 @@ test('an admin can add a template and it appears in the library', async ({ page 
   await expect(page.getByRole('heading', { name: 'Uploaded By E2E' })).toBeVisible();
 });
 
-test('the admin form rejects a wrong token with a clear message', async ({ page }) => {
+test('the admin form rejects a file that is not a DOCX or PPTX with a clear message', async ({ page }) => {
   await page.goto('/admin/templates');
-  await page.getByLabel('Admin token').fill('definitely-wrong-token');
+  await expect(page.getByLabel('Admin token')).toHaveCount(0);
   await page.getByLabel('Template name').fill('Should Not Exist');
   await page.getByLabel('Category').fill('Testing');
   await page.getByLabel('Short description').fill('This upload must be rejected.');
-  await page.getByLabel(/File/).setInputFiles(path.join(SERVER_TEMPLATES, 'docx/business-letter/template.docx'));
+  await page.getByLabel(/File/).setInputFiles({ name: 'fake.docx', mimeType: 'application/octet-stream', buffer: Buffer.from('not an office file') });
   await page.getByRole('button', { name: 'Add template' }).click();
-  await expect(page.getByRole('alert').filter({ hasText: 'admin token' })).toBeVisible();
+  await expect(page.getByRole('alert').filter({ hasText: /DOCX|PPTX/ })).toBeVisible();
 });

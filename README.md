@@ -14,7 +14,7 @@ A working template gallery for Office documents. Pick a **Word (DOCX)** or **Pow
 | Frontend | TanStack Start (React 19, SSR), TanStack Router and Form, TipTap, Tailwind CSS, [beUI](https://beui.dev) components (Button, Input, Tabs, Select, Combobox) |
 | Backend | Hono on Node, zod, OpenAPI/Swagger |
 | Data | SQLite (Drizzle ORM), local file storage |
-| Tests | Vitest (88), Playwright (34) |
+| Tests | Vitest (86), Playwright (34) |
 
 ## Quick start
 
@@ -41,7 +41,7 @@ For development with hot reload, use `pnpm dev` instead of `pnpm start`.
 docker compose up --build
 ```
 
-Open <http://localhost:3000>. The API image includes LibreOffice (used to render previews of uploaded templates). The compose file uses a demo `ADMIN_TOKEN`; set your own with `ADMIN_TOKEN=... docker compose up`. See the note in [docs/LIMITATIONS.md](docs/LIMITATIONS.md): the images were not built in the authoring environment.
+Open <http://localhost:3000>. The API image includes LibreOffice (used to render previews of uploaded templates). See the note in [docs/LIMITATIONS.md](docs/LIMITATIONS.md): the images were not built in the authoring environment.
 
 ## Try it
 
@@ -50,7 +50,7 @@ Open <http://localhost:3000>. The API image includes LibreOffice (used to render
 3. **Presentations** → **Modern Pitch Deck** → **Use this template**. Click any text on the slide to edit it in place, format it on the **Home** tab (changes save automatically when you click anywhere outside the text; **Save** / Ctrl+S still work), use **New Slide** / **Delete**, try **Present** (arrow keys, Esc to exit), then **Download PPTX**.
 4. **My files** lists everything created in this browser session; the pencil next to a name renames it (Enter saves, Escape cancels) and the trash icon deletes it after a confirmation. The sidebar's **Recent** list shows your 20 latest files.
 5. Prove the original is untouched: use the same template again; the new copy starts without your edits.
-6. Add a template: <http://localhost:3000/admin/templates> (token `dev-admin-token` in development).
+6. Add a template: <http://localhost:3000/admin/templates> (no login: see the security note in [docs/LIMITATIONS.md](docs/LIMITATIONS.md)).
 7. Turn JavaScript off: the library, filters, `?q=` search URLs and preview pages still work, because they are server-rendered.
 
 ## Commands
@@ -68,7 +68,7 @@ Open <http://localhost:3000>. The API image includes LibreOffice (used to render
 | `pnpm --filter @office-template/web analyze` | JS/CSS size per page of a running build |
 | `pnpm --filter @office-template/web perf` | Frame times and long tasks in Chrome for the heaviest interactions (a ~9k-word document, a 60-slide deck); add `--throttle=4` to emulate a slower CPU |
 
-`pnpm start` runs in development mode (admin token `dev-admin-token`). For a hardened production run, start the API with `NODE_ENV=production` and `ADMIN_TOKEN` set (`pnpm --filter @office-template/server start`) and the web app (`pnpm --filter @office-template/web start`) with `API_INTERNAL_URL` pointing at the API.
+`pnpm start` runs in development mode. For a production run, start the API with `NODE_ENV=production` (`pnpm --filter @office-template/server start`) and the web app (`pnpm --filter @office-template/web start`) with `API_INTERNAL_URL` pointing at the API.
 
 ## Add a template without touching the UI
 

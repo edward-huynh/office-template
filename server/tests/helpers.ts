@@ -12,7 +12,6 @@ import { TemplatesRepository } from '../src/modules/templates/templates.reposito
 import { parseEnv, SERVER_ROOT } from '../src/shared/configs/env.js';
 import { createLogger } from '../src/shared/utils/logger.js';
 
-export const ADMIN_TOKEN = 'test-admin-token';
 export const CATALOG_DIR = path.join(SERVER_ROOT, 'templates');
 
 /** A client that keeps its cookie jar, like a browser tab. */
@@ -43,7 +42,6 @@ export async function createTestContext(overrides: Record<string, string> = {}, 
     STORAGE_DIR: root,
     CATALOG_DIR,
     MAX_UPLOAD_MB: '1',
-    ADMIN_TOKEN,
     ...overrides,
   } as NodeJS.ProcessEnv);
 

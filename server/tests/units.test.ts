@@ -67,9 +67,6 @@ describe('parseEnv', () => {
   it('fails fast on invalid values', () => {
     expect(() => parseEnv({ PORT: 'abc' } as NodeJS.ProcessEnv)).toThrow(/Invalid environment configuration/);
   });
-  it('requires ADMIN_TOKEN in production', () => {
-    expect(() => parseEnv({ NODE_ENV: 'production' } as NodeJS.ProcessEnv)).toThrow(/ADMIN_TOKEN/);
-  });
 });
 
 describe('manifest loader', () => {

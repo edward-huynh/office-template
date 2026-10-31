@@ -32,7 +32,7 @@ export function UploadForm() {
   const [result, setResult] = useState<{ template?: Template; error?: string }>({});
 
   const form = useForm({
-    defaultValues: { token: '', name: '', category: '', description: '', file: null as File | null },
+    defaultValues: { name: '', category: '', description: '', file: null as File | null },
     onSubmit: async ({ value }) => {
       setResult({});
       if (!value.file) return;
@@ -42,7 +42,7 @@ export function UploadForm() {
       body.set('category', value.category.trim());
       body.set('description', value.description.trim());
       try {
-        setResult({ template: await uploadTemplate(body, value.token) });
+        setResult({ template: await uploadTemplate(body) });
       } catch (error) {
         const detail = error instanceof ApiClientError && error.errors ? ` ${Object.values(error.errors).flat().join(' ')}` : '';
         setResult({ error: error instanceof ApiClientError ? `${error.message}.${detail}`.replace('..', '.') : 'Upload failed.' });
@@ -65,18 +65,6 @@ export function UploadForm() {
       }}
       className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 "
     >
-      <form.Field name="token" validators={{ onBlur: required, onSubmit: required }}>
-        {(field) => (
-          <Input
-            label="Admin token" type="password" autoComplete="off"
-            value={field.state.value}
-            onBlur={field.handleBlur}
-            onChange={field.handleChange}
-            error={field.state.meta.errors[0]?.toString()}
-            reserveErrorLine
-          />
-        )}
-      </form.Field>
       <form.Field name="name" validators={{ onBlur: required, onSubmit: required }}>
         {(field) => (
           <Input

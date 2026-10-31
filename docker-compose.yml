@@ -3,9 +3,6 @@ services:
     build:
       context: .
       dockerfile: server/Dockerfile
-    environment:
-      # Demo value so the stack starts out of the box. Set ADMIN_TOKEN in your environment for anything real.
-      ADMIN_TOKEN: ${ADMIN_TOKEN:-docker-demo-admin-token}
     volumes:
       - office-data:/data
     healthcheck:

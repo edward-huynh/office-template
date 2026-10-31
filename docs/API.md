@@ -21,7 +21,6 @@ Base path: `/api`. The live OpenAPI 3 document is served at `/api/openapi.json` 
 | Status | Meaning |
 | --- | --- |
 | 400 | Bad request (for example an invalid storage key, or editing a type with no editor) |
-| 401 | Missing or invalid admin token |
 | 404 | Resource not found, **or not owned by the current session** |
 | 413 | Upload larger than `MAX_UPLOAD_MB` |
 | 415 | Upload is not a valid DOCX or PPTX |
@@ -222,7 +221,7 @@ Streams the file with `Content-Disposition: attachment`, the correct MIME type a
 
 ### `POST /api/admin/templates`
 
-Header `x-admin-token: <ADMIN_TOKEN>` is required (in development the default is `dev-admin-token`). `multipart/form-data`:
+No authentication is required (see the security note in the limitations). `multipart/form-data`:
 
 | Field | Required | Notes |
 | --- | --- | --- |
@@ -236,7 +235,6 @@ Header `x-admin-token: <ADMIN_TOKEN>` is required (in development the default is
 
 ```bash
 curl -X POST http://localhost:3000/api/admin/templates \
-  -H "x-admin-token: dev-admin-token" \
   -F "file=@my-template.docx" \
   -F "name=My Template" -F "category=Custom" -F "description=Added from the command line"
 ```
