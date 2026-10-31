@@ -58,7 +58,10 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
       onClick={(event) => event.target === event.currentTarget && dialog.current?.close()}
       className="w-[min(1080px,calc(100vw-1.5rem))] overflow-hidden rounded-xl p-0 shadow-2xl backdrop:bg-slate-900/60 backdrop:backdrop-blur-sm"
     >
-      <div className="grid max-h-[calc(100vh-1.5rem)] md:grid-cols-[1fr_21rem]">
+      {/* The row must be capped at the grid's max-height (minmax(0,1fr)); with an auto row a long preview
+          grows the row instead, nothing scrolls and the side panel's buttons are clipped. On a narrow
+          screen the two stack and the whole modal scrolls. */}
+      <div className="grid max-h-[calc(100dvh-1.5rem)] max-md:overflow-y-auto md:grid-cols-[1fr_21rem] md:grid-rows-[minmax(0,1fr)]">
         <div className="min-h-0 overflow-y-auto bg-gradient-to-br from-slate-100 to-slate-200 p-6">
           {isDeck ? (
             <div className="space-y-4">
