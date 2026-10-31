@@ -61,7 +61,12 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
       {/* The row must be capped at the grid's max-height (minmax(0,1fr)); with an auto row a long preview
           grows the row instead, nothing scrolls and the side panel's buttons are clipped. On a narrow
           screen the two stack and the whole modal scrolls. */}
-      <div className="grid max-h-[calc(100dvh-1.5rem)] max-md:overflow-y-auto md:grid-cols-[1fr_21rem] md:grid-rows-[minmax(0,1fr)]">
+      <div
+        className={`grid max-md:overflow-y-auto md:grid-cols-[1fr_21rem] md:grid-rows-[minmax(0,1fr)] ${
+          // A document shows one page, so the modal has a fixed height (no jump when the image loads).
+          isDeck ? 'max-h-[calc(100dvh-1.5rem)]' : 'h-[min(calc(100dvh-1.5rem),56rem)]'
+        }`}
+      >
         <div className="min-h-0 overflow-y-auto bg-gradient-to-br from-slate-100 to-slate-200 p-6">
           {isDeck ? (
             <div className="space-y-4">
@@ -89,19 +94,17 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
               </ol>
             </div>
           ) : (
-            <ol className="mx-auto max-w-md space-y-5">
-              {template.previewUrls.map((url, i) => (
-                <li key={url}>
-                  <img
-                    src={url}
-                    alt={`${template.name}, page ${i + 1}`}
-                    width={720}
-                    height={932}
-                    className="block h-auto w-full bg-white ring-1 ring-black/10"
-                  />
-                </li>
-              ))}
-            </ol>
+            // A document shows its first page only, sized to fit the modal (the modal's padding is
+            // 3rem, the window margin 1.5rem); "Open full page" has every page.
+            <div className="grid h-full min-h-0 place-items-center">
+              <img
+                src={template.previewUrls[0]}
+                alt={`${template.name}, page 1`}
+                width={720}
+                height={932}
+                className="block h-auto max-h-[calc(100dvh-4.5rem)] w-auto max-w-full bg-white object-contain ring-1 ring-black/10 md:max-h-full"
+              />
+            </div>
           )}
         </div>
 
@@ -134,6 +137,9 @@ export function QuickPreview({ template, onClose }: { template: Template; onClos
             <dt className="text-slate-500">Version</dt>
             <dd className="font-medium">{template.version}</dd>
           </dl>
+          {!isDeck && total > 1 ? (
+            <p className="text-sm text-slate-600">Showing page 1 of {total}. Open the full page to see every page.</p>
+          ) : null}
           <div className="mt-auto space-y-3 pt-2">
             <UseTemplateButton templateId={template.id} label="Use this template" />
             <FullPageLink template={template} />
