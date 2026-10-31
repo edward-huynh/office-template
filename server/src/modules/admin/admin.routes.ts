@@ -18,7 +18,7 @@ const uploadRoute = createRoute({
   tags: ['Admin'],
   summary: 'Add or update a template',
   description:
-    'The type (DOCX or PPTX) is detected from the file contents. ' +
+    'The type (DOCX or PPTX) is detected from the file contents; the optional `type` field, when sent, must match it (415 otherwise). ' +
     'Uploading an existing id with a different file creates a new template version.',
   request: { body: { required: true, content: { 'multipart/form-data': { schema: uploadSchema } } } },
   responses: {
@@ -46,11 +46,16 @@ export const adminRoutes = ({ env, importer, previews }: Services) => {
   return new OpenAPIHono().openapi(
     uploadRoute,
     async (c) => {
-      const { file, name, category, description, id } = c.req.valid('form');
+      const { file, type: requestedType, name, category, description, id } = c.req.valid('form');
       if (file.size > maxBytes) throw ApiError.payloadTooLarge(`Files are limited to ${env.MAX_UPLOAD_MB} MB`);
 
       const bytes = Buffer.from(await file.arrayBuffer());
       const type = await detectDocType(bytes);
+      if (requestedType && requestedType !== type) {
+        throw ApiError.unsupportedMediaType(
+          `The file is a ${type.toUpperCase()} file, but the selected type is ${requestedType.toUpperCase()}`,
+        );
+      }
 
       const resolvedId = id ?? slugify(name);
       const idCheck = slugSchema.safeParse(resolvedId);

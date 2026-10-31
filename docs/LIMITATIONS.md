@@ -24,14 +24,14 @@
 **Shared platform**
 
 - Manifest-driven catalog and idempotent `pnpm seed`; versioning by checksum.
-- Admin upload API and form (type detected from file contents, size and structure validation).
+- Admin upload API and form: a Type select (DOCX / PPTX) checked against the file contents, a Category combobox listing the categories that exist for that type with "Create" for a new one, size and structure validation.
 - `DocTypeHandler` registry as the extension point for other Office types.
 - OpenAPI/Swagger generated from the validation schemas.
 - Anonymous per-session ownership of documents.
 - SSR for library, preview and "My files"; real HTTP 404s; Open Graph tags on preview pages.
 - Dia-style layout with a command palette (beUI, Cmd/Ctrl+K) for templates and your files, plus-circles on Documents and Presentations that create blank files, and beUI Button, Input, Tabs, Select and Combobox throughout.
 - DOCX/PPTX conversions run in a worker thread so large saves never stall the API; `pnpm perf` measures frames and long tasks.
-- Tests: 86 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 35 end-to-end tests (Playwright), typecheck for both packages.
+- Tests: 87 server tests (Vitest; 3 need LibreOffice and skip without it; the worker-pool tests start real worker threads), 37 end-to-end tests (Playwright), typecheck for both packages.
 
 ## Not completed
 

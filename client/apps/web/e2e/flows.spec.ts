@@ -637,25 +637,106 @@ test('a missing document shows the not-found page', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Browse documents' })).toBeVisible();
 });
 
-test('a template can be added from the admin page and appears in the library', async ({ page }) => {
+async function fillAdminForm(page: import('@playwright/test').Page, fields: { name: string; description?: string }) {
+  await page.getByLabel('Template name').fill(fields.name);
+  await page.getByLabel('Short description').fill(fields.description ?? 'Template added by the end-to-end test.');
+}
+
+async function pickType(page: import('@playwright/test').Page, label: 'Document (.docx)' | 'Presentation (.pptx)') {
+  await page.getByRole('button', { name: 'Type', exact: true }).click();
+  await page.getByRole('option', { name: label }).click();
+}
+
+test('add template: choose the type and an existing category, then it appears in the library', async ({ page }) => {
   await page.goto('/admin/templates');
-  await page.getByLabel('Template name').fill('Uploaded By E2E');
-  await page.getByLabel('Category').fill('Testing');
-  await page.getByLabel('Short description').fill('Template added by the end-to-end test.');
+  await expect(page.getByRole('button', { name: 'Type', exact: true })).toContainText('Document (.docx)'); // default
+  await fillAdminForm(page, { name: 'Uploaded By E2E' });
+
+  // The category list holds the categories that already exist for this type.
+  const category = page.getByRole('combobox', { name: 'Category' });
+  await category.click();
+  const list = page.getByRole('listbox', { name: 'Categories' });
+  await expect(list.getByRole('option').first()).toBeVisible();
+  await expect(list.getByRole('option', { name: /Create/ })).toHaveCount(0); // nothing typed: no "Create"
+  const existing = (await list.getByRole('option').first().innerText()).trim();
+  await list.getByRole('option').first().click();
+  await expect(category).toHaveValue(existing);
+
   await page.getByLabel(/File/).setInputFiles(path.join(SERVER_TEMPLATES, 'docx/business-letter/template.docx'));
   await page.getByRole('button', { name: 'Add template' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible();
 
-  await page.goto('/docx?q=Uploaded');
+  await page.goto(`/docx?q=Uploaded&category=${encodeURIComponent(existing)}`);
   await expect(page.getByRole('heading', { name: 'Uploaded By E2E' })).toBeVisible();
+});
+
+test('add template: a new category for the chosen type is created from the combobox', async ({ page }) => {
+  await page.goto('/admin/templates');
+  await pickType(page, 'Presentation (.pptx)');
+  await fillAdminForm(page, { name: 'Deck With New Category' });
+
+  const category = page.getByRole('combobox', { name: 'Category' });
+  await category.click();
+  await category.fill('Brand New Category');
+  const list = page.getByRole('listbox', { name: 'Categories' });
+  await expect(list.getByRole('option', { name: 'Create “Brand New Category”' })).toBeVisible();
+  await list.getByRole('option', { name: 'Create “Brand New Category”' }).click();
+  await expect(category).toHaveValue('Brand New Category');
+
+  await page.getByLabel(/File/).setInputFiles(path.join(SERVER_TEMPLATES, 'pptx/lesson-plan/template.pptx'));
+  await page.getByRole('button', { name: 'Add template' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Saved' })).toBeVisible();
+
+  // The new category now exists for presentations, and only for them.
+  await page.goto('/pptx?category=Brand%20New%20Category');
+  await expect(page.getByRole('heading', { name: 'Deck With New Category' })).toBeVisible();
+  await page.goto('/admin/templates');
+  await page.getByRole('combobox', { name: 'Category' }).click();
+  await expect(page.getByRole('listbox', { name: 'Categories' }).getByRole('option', { name: 'Brand New Category' })).toHaveCount(0); // docx list
+  await pickType(page, 'Presentation (.pptx)');
+  await page.getByRole('combobox', { name: 'Category' }).click();
+  await expect(page.getByRole('listbox', { name: 'Categories' }).getByRole('option', { name: 'Brand New Category' })).toBeVisible();
+});
+
+test('add template: the file must match the chosen type, and the form says so', async ({ page }) => {
+  await page.goto('/admin/templates');
+  await fillAdminForm(page, { name: 'Mismatch' });
+  const category = page.getByRole('combobox', { name: 'Category' });
+  await category.click();
+  await category.fill('Testing');
+  await page.getByRole('option', { name: 'Create “Testing”' }).click();
+
+  // Wrong extension: caught in the browser.
+  await pickType(page, 'Presentation (.pptx)');
+  await category.click();
+  await category.fill('Testing');
+  await page.getByRole('option', { name: 'Create “Testing”' }).click();
+  await page.getByLabel(/File/).setInputFiles(path.join(SERVER_TEMPLATES, 'docx/business-letter/template.docx'));
+  await page.getByRole('button', { name: 'Add template' }).click();
+  await expect(page.getByText('so choose a .pptx file')).toBeVisible();
+
+  // Right extension, wrong content: caught by the server, which reads the file.
+  await pickType(page, 'Document (.docx)');
+  await category.click();
+  await category.fill('Testing');
+  await page.getByRole('option', { name: 'Create “Testing”' }).click();
+  await page.getByLabel(/File/).setInputFiles({
+    name: 'really-a-deck.docx',
+    mimeType: 'application/octet-stream',
+    buffer: await fs.readFile(path.join(SERVER_TEMPLATES, 'pptx/lesson-plan/template.pptx')),
+  });
+  await page.getByRole('button', { name: 'Add template' }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'PPTX file, but the selected type is DOCX' })).toBeVisible();
 });
 
 test('the admin form rejects a file that is not a DOCX or PPTX with a clear message', async ({ page }) => {
   await page.goto('/admin/templates');
   await expect(page.getByLabel('Admin token')).toHaveCount(0);
-  await page.getByLabel('Template name').fill('Should Not Exist');
-  await page.getByLabel('Category').fill('Testing');
-  await page.getByLabel('Short description').fill('This upload must be rejected.');
+  await fillAdminForm(page, { name: 'Should Not Exist', description: 'This upload must be rejected.' });
+  const category = page.getByRole('combobox', { name: 'Category' });
+  await category.click();
+  await category.fill('Testing');
+  await page.getByRole('option', { name: 'Create “Testing”' }).click();
   await page.getByLabel(/File/).setInputFiles({ name: 'fake.docx', mimeType: 'application/octet-stream', buffer: Buffer.from('not an office file') });
   await page.getByRole('button', { name: 'Add template' }).click();
   await expect(page.getByRole('alert').filter({ hasText: /DOCX|PPTX/ })).toBeVisible();

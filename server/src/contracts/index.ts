@@ -197,6 +197,8 @@ export type SlideEdits = z.infer<typeof slideEditsSchema>;
 // -------------------------------------------------------------------- admin
 
 export const adminUploadFieldsSchema = z.object({
+  /** Optional: the type is always detected from the file; when given it must agree with the detected one. */
+  type: docTypeSchema.optional(),
   name: z.string().trim().min(1).max(120),
   category: z.string().trim().min(1).max(60),
   description: z.string().trim().min(1).max(500),
